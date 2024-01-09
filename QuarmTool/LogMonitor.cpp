@@ -6,8 +6,9 @@
 LogMonitor::LogMonitor()
 {
     
-    rolls = std::shared_ptr<RollMonitor>(new RollMonitor);
-    ch = std::shared_ptr<CHMonitor>(new CHMonitor);
+    rolls = std::shared_ptr<RollParser>(new RollParser);
+    ch = std::shared_ptr<CHParser>(new CHParser);
+    dkp = std::shared_ptr<DKPParser>(new DKPParser);
     UpdateFolder();
 }
 
@@ -62,6 +63,7 @@ void LogMonitor::HandleNewLine(const std::string& data)
 
     rolls->parse_data(timestamp_t, removed_stamp_data);
     ch->parse_data(timestamp_t, removed_stamp_data);
+    dkp->parse_data(timestamp_t, removed_stamp_data);
 
 }
 void LogMonitor::HandleFileChange(std::string filename)

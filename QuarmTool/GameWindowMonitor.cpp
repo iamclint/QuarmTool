@@ -64,7 +64,7 @@ void UpdateGameWindowHandle(const std::wstring& processName)
                 if (_wcsicmp(processEntry.szExeFile, processName.c_str()) == 0)
                 {
                     processId = processEntry.th32ProcessID;
-                    break;
+                    //break;
                 }
             } while (Process32NextW(snapshot, &processEntry));
         }

@@ -1,10 +1,11 @@
-#include "CHMonitor.h"
+#include "CHParser.h"
 #include <TlHelp32.h>
 #include "ImGui/imgui.h"
 #include <sstream>
 #include "QuarmTool.h"
 #include <regex>
 #include <chrono>
+#include "ImGuiWidgets.h"
 
 
 bool parseMessage(const std::string& message, CHCast& ref_cast)
@@ -30,7 +31,7 @@ bool parseMessage(const std::string& message, CHCast& ref_cast)
 }
 
 
-void CHMonitor::parse_data(std::time_t timestamp, std::string data)
+void CHParser::parse_data(std::time_t timestamp, std::string data)
 {
     OutputDebugStringA(data.c_str());
     CHCast tmp_cast;
@@ -85,7 +86,52 @@ std::string DurationStr(std::chrono::time_point<std::chrono::steady_clock> end_t
     return result.str();
 }
 
-void CHMonitor::draw()
+void CHParser::draw_ui()
+{
+    auto currentTime = std::chrono::steady_clock::now();
+    ImGui::BeginChild(std::string("CHUI").c_str());
+    for (int i = 0; auto & [heal_to, casters] : active_heals)
+    {
+        if (casters.size())
+        {
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(.1f, .1f, .1f, 1.f));
+            ImGui::BeginChild((heal_to + "chui").c_str(), { 200, 300 }, true);
+            ImGui::Text("Heals to %s", heal_to.c_str());
+            if (ImGui::BeginTable((heal_to + "heallist").c_str(), 2, ImGuiTableFlags_SizingFixedFit))
+            {
+                for (auto& c : casters) {
+
+
+                    auto end_time_ms = (c.startTime + std::chrono::milliseconds((int)c.cast_time));
+
+                    // Calculate the time duration between current time and end time
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time_ms - currentTime);
+
+                    // Calculate the total duration from start to end
+                    auto totalDuration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time_ms - c.startTime);
+
+                    // Calculate the percentage of time left as a float
+                    float percentageTimeLeft = (static_cast<float>(duration.count()) / totalDuration.count());
+                    std::stringstream ss;
+                    ss << std::chrono::duration_cast<std::chrono::seconds>(duration) << std::endl;
+                    if (percentageTimeLeft > 0)
+                    {
+                        ImGui::TableNextColumn();
+                        ImGui::Text(c.caster.c_str());
+                        ImGui::TableNextColumn();
+                        ImGui::EqProgressBar((heal_to + c.caster).c_str(), percentageTimeLeft, { 100, 15 }, ss.str().c_str(), ImGui::GenerateColorFromStr(c.caster));
+                    }
+                }
+                ImGui::EndTable();
+            }
+            ImGui::EndChild();
+            ImGui::PopStyleColor();
+        }
+    }
+    ImGui::EndChild();
+}
+
+void CHParser::draw()
 {
     static QuarmTool* qt = QuarmTool::GetInst();
     if (!qt)
@@ -105,9 +151,7 @@ void CHMonitor::draw()
         float vertical_padding = 10;
         float heal_height = 35;
         float base_top = qt->pGameWindow->Rect.bottom - height * .45f;
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0, 0 });
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.486726, 0.486726, 0.486726, 1.0));
+
         for (int i = 0; auto& [heal_to, casters] : active_heals)
         {
             if (casters.size() == 0) //no active casts on target
@@ -116,6 +160,11 @@ void CHMonitor::draw()
 
             if (IsWindowVisible(qt->pGameWindow->Handle))
             {
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
+              //  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0, 0 });
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.486726, 0.486726, 0.486726, 1.0));
+                
+                
                 ImGui::SetNextWindowBgAlpha(.85f);
 
                 ImGui::SetNextWindowPos({ qt->pGameWindow->Rect.left + ((width - heal_window_width) / 2),  base_top + ((heal_height + vertical_padding) * i) }, ImGuiCond_Always);
@@ -126,26 +175,20 @@ void CHMonitor::draw()
 
                     if (ImGui::IsWindowAppearing())
                         SetFocus(qt->pGameWindow->Handle);
-                    //for (int l = 1; l < 10; l++) //draw 1 second interval tick marks
-                    //{
-                    //    float increment_size = heal_window_width/10;
-                    //    ImVec2 current_pos = { ImGui::GetWindowPos().x + (l * increment_size), ImGui::GetWindowPos().y };
-                    //    ImGui::GetWindowDrawList()->AddLine({ current_pos.x, current_pos.y }, { current_pos.x , current_pos.y+heal_height }, ImColor(0.5f, 0.5f, 0.5f, 0.2f), 2);
-                    //}
+
                     if (casters.size())
                     {
                         auto currentTime = std::chrono::steady_clock::now();
                         CHCast cast = casters.front();
                         std::string time_left = DurationStr(cast.startTime + std::chrono::milliseconds((int)cast.cast_time), currentTime);
-                        ImVec2 text_size = ImGui::CalcTextSize(time_left.c_str());
-                        ImGui::GetWindowDrawList()->AddText(WindowTranslate({ cast.current_pos / 2 - (text_size.x / 2), (heal_height / 2) - text_size.y - 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f), time_left.c_str());
-                        ImGui::GetWindowDrawList()->AddLine(WindowTranslate({ 0, heal_height / 2 }), WindowTranslate({ cast.current_pos, heal_height / 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f));
+                        
+                        if (std::chrono::duration_cast<std::chrono::milliseconds>((cast.startTime + std::chrono::milliseconds((int)cast.cast_time)) - currentTime).count() > 0)
+                        {
+                            ImVec2 text_size = ImGui::CalcTextSize(time_left.c_str());
+                            ImGui::GetWindowDrawList()->AddText(WindowTranslate({ std::clamp(cast.current_pos / 2 - (text_size.x / 2),text_size.x + (ImGui::GetStyle().FramePadding.x*2), 1000000.f), (heal_height / 2) - text_size.y - 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f), time_left.c_str());
+                            ImGui::GetWindowDrawList()->AddLine(WindowTranslate({ 0, heal_height / 2 }), WindowTranslate({ cast.current_pos, heal_height / 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f));
+                        }
                     }
-
-
-                    ImGui::Button(heal_to.c_str(), {0, heal_height});
-                    ImGui::SameLine();
-
 
 
                     for (auto it = casters.begin(); it != casters.end(); ++it) {
@@ -157,9 +200,10 @@ void CHMonitor::draw()
                             cast.current_pos = ImGui::GetWindowWidth();
                         animateButton(cast.current_pos, cast.startTime, cast.cast_time);
 
-
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GenerateColorFromStr(cast.caster).Value);
                         ImGui::SetCursorPosX(cast.current_pos);
                         ImGui::Button(cast.identifier.c_str(), { 0, heal_height });
+                        ImGui::PopStyleColor();
                         float w = ImGui::GetItemRectSize().x;
                         ImGui::SameLine();
                         auto currentTime = std::chrono::steady_clock::now();
@@ -171,14 +215,16 @@ void CHMonitor::draw()
 
                             std::string dur = DurationStr(next.startTime, cast.startTime);
                             ImVec2 text_size = ImGui::CalcTextSize(dur.c_str());
-                            ImGui::GetWindowDrawList()->AddText(WindowTranslate({ cast.current_pos + (next.current_pos-cast.current_pos + w)/2 - (text_size.x/2), (heal_height / 2) - text_size.y - 2}), ImColor(0.0f, 0.5f, 0.0f, 1.f), dur.c_str());
-                            ImGui::GetWindowDrawList()->AddLine(WindowTranslate({ cast.current_pos +  w, heal_height / 2 }), WindowTranslate({next.current_pos, heal_height / 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f));
+                            ImGui::GetWindowDrawList()->AddText(WindowTranslate({ cast.current_pos + (next.current_pos - cast.current_pos + w) / 2 - (text_size.x / 2), (heal_height / 2) - text_size.y - 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f), dur.c_str());
+                            ImGui::GetWindowDrawList()->AddLine(WindowTranslate({ cast.current_pos + w, heal_height / 2 }), WindowTranslate({ next.current_pos, heal_height / 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f));
                         }
                     }
-
+                    ImGui::SetCursorPosX(0);
+                    ImGui::Button(heal_to.c_str(), {0, heal_height});
+                    ImGui::SameLine();
                 }
                 ImGui::End();
-                ImGui::PopStyleVar(2);
+                ImGui::PopStyleVar();
                 ImGui::PopStyleColor();
             }
             casters.erase(std::remove_if(casters.begin(), casters.end(), [](CHCast c) {
@@ -196,12 +242,12 @@ void CHMonitor::draw()
 
 }
 
-CHMonitor::CHMonitor()
+CHParser::CHParser()
 {
 }
 
 
-CHMonitor::~CHMonitor()
+CHParser::~CHParser()
 {
 
 }

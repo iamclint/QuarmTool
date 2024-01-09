@@ -146,9 +146,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CHMonitor.cpp" />
+    <ClCompile Include="CHParser.cpp" />
+    <ClCompile Include="DKPParser.cpp" />
     <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="GameWindowMonitor.cpp" />
+    <ClCompile Include="ImGuiWidgets.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_demo.cpp" />
     <ClCompile Include="ImGui\imgui_draw.cpp" />
@@ -160,14 +162,16 @@
     <ClCompile Include="LogMonitor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="QuarmTool.cpp" />
-    <ClCompile Include="RollMonitor.cpp" />
+    <ClCompile Include="RollParser.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CHMonitor.h" />
+    <ClInclude Include="CHParser.h" />
+    <ClInclude Include="DKPParser.h" />
     <ClInclude Include="Drawing.h" />
     <ClInclude Include="GameWindowMonitor.h" />
+    <ClInclude Include="ImGuiWidgets.h" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />
     <ClInclude Include="ImGui\imgui_impl_dx11.h" />
@@ -180,7 +184,7 @@
     <ClInclude Include="LogMonitor.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="QuarmTool.h" />
-    <ClInclude Include="RollMonitor.h" />
+    <ClInclude Include="RollParser.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="UI.h" />
   </ItemGroup>

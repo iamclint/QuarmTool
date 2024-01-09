@@ -16,6 +16,12 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Sources\Parsers">
+      <UniqueIdentifier>{fe943d51-93e1-4042-b034-f196dab3e29d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Parsers">
+      <UniqueIdentifier>{222cf4f9-07cf-4ef2-8e59-d8591de9265e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -60,14 +66,20 @@
     <ClCompile Include="ImGui\imgui_stdlib.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="RollMonitor.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CHMonitor.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="GameWindowMonitor.cpp">
       <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="CHParser.cpp">
+      <Filter>Sources\Parsers</Filter>
+    </ClCompile>
+    <ClCompile Include="RollParser.cpp">
+      <Filter>Sources\Parsers</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiWidgets.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="DKPParser.cpp">
+      <Filter>Sources\Parsers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -107,23 +119,29 @@
     <ClInclude Include="Settings.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="ImGui\imgui_stdlib.h">
+      <Filter>Headers\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="GameWindowMonitor.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="RollParser.h">
+      <Filter>Headers\Parsers</Filter>
+    </ClInclude>
     <ClInclude Include="QuarmTool.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="LogMonitor.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="ImGui\imgui_stdlib.h">
-      <Filter>Headers\ImGui</Filter>
+    <ClInclude Include="CHParser.h">
+      <Filter>Headers\Parsers</Filter>
     </ClInclude>
-    <ClInclude Include="RollMonitor.h">
+    <ClInclude Include="ImGuiWidgets.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="CHMonitor.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="GameWindowMonitor.h">
-      <Filter>Headers</Filter>
+    <ClInclude Include="DKPParser.h">
+      <Filter>Headers\Parsers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

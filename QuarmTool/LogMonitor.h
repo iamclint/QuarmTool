@@ -4,16 +4,18 @@
 #include <string>
 #include <iostream>
 #include <unordered_map>
-#include "RollMonitor.h"
-#include "CHMonitor.h"
+#include "RollParser.h"
+#include "CHParser.h"
+#include "DKPParser.h"
 class LogMonitor
 {
 public:
 
 	void UpdateFolder();
 
-	std::shared_ptr<class RollMonitor> rolls;
-	std::shared_ptr<class CHMonitor> ch;
+	std::shared_ptr<class RollParser> rolls;
+	std::shared_ptr<class CHParser> ch;
+	std::shared_ptr<class DKPParser> dkp;
 
 	LogMonitor();
 	~LogMonitor();

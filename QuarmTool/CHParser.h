@@ -25,14 +25,15 @@ struct CHCast
 	CHCast(std::string _caster, std::string _target, std::string _identifier, std::time_t timestamp, float _cast_time)
 		: caster(_caster), target(_target), identifier(_identifier), casting_timestamp(timestamp), current_pos(-1), startTime(std::chrono::steady_clock::now()), cast_time(_cast_time) {};
 };
-class CHMonitor
+class CHParser
 {
 public:
 	void parse_data(std::time_t timestamp, std::string data);
 	void draw();
+	void draw_ui();
 	std::unordered_map<std::string, std::vector<CHCast>> active_heals;
-	CHMonitor();
-	~CHMonitor();
+	CHParser();
+	~CHParser();
 private:
 
 };
