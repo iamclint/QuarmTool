@@ -158,16 +158,16 @@ void UI::Render()
     MONITORINFO info = {};
     info.cbSize = sizeof(MONITORINFO);
     GetMonitorInfo(monitor, &info);
-    const int monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
+    //const int monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
 
-    if (monitor_height > 1080)
-    {
-        const float fScale = 2.0f;
-        ImFontConfig cfg;
-        cfg.SizePixels = 13 * fScale;
-        ImGui::GetIO().Fonts->AddFontDefault(&cfg);
-    }
-    
+    //if (monitor_height > 1080)
+    //{
+    //    const float fScale = 2.0f;
+    //    ImFontConfig cfg;
+    //    cfg.SizePixels = 13 * fScale;
+    //    ImGui::GetIO().Fonts->AddFontDefault(&cfg);
+    //}
+    //
     //ImGui::GetIO().IniFilename = nullptr;
 
     ImGui_ImplWin32_Init(hwnd);

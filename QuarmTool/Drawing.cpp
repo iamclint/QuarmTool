@@ -49,6 +49,8 @@ void FolderSelectQuarm()
 				char selectedPath[MAX_PATH];
 				if (SHGetPathFromIDListA(pidl, selectedPath)) {
 					qt->pSettings->game_path = selectedPath;
+					qt->pSettings->update("game_path", selectedPath);
+					qt->pLogMonitor->UpdateFolder();
 				}
 
 				// Free the PIDL

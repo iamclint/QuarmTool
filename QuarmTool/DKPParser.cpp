@@ -8,18 +8,16 @@
 
 bool parseMessage(const std::string& message, DKPBid& bid)
 {
-    std::regex pattern(R"(\s*([^;]+)\s*;\s*([^;]+)\s*;\s*(.*);\s*(.*))");
+    std::regex pattern(R"((\w+) (?:tells|say(?:s)?,).+?'(\w.+?) ; (\d+) ; (\w+)(?: Gratss) ; (.+?)'\s*)");
     // Use std::smatch to store the matched groups
-    std::smatch matches;
-
    std::smatch match;
 
     // Attempt to match the regular expression
     if (std::regex_match(message, match, pattern)) {
         // Access captured groups using match
-        if (matches.size() == 4)
+        if (match.size() == 6)
         {
-            bid = DKPBid(match[1], match[2], match[3], match[4]);
+            bid = DKPBid(match[4], match[2], match[1], match[5]);
             return true;
         }
     }
