@@ -44,8 +44,12 @@ class DKPParser
 public:
 	void parse_data(std::time_t timestamp, std::string data);
 	void draw();
+    std::string current_regex = "";
 	std::vector<DKPBid> wins;
 	DKPParser();
 	~DKPParser();
+private:
+    const std::string base_regex = R"((\w+) (?:tells|say(?:s)?,).+?'(\w.+?) ?; ?(\d+) ?; ?(\w+) ?(?:Gratss)? ?(?:;)?(?: )?(.+?)'\s)";
+    bool parseMessage(const std::string& message, DKPBid& bid);
 };
 

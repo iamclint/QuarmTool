@@ -150,11 +150,11 @@ void RollParser::parse_data(std::time_t timestamp, std::string data)
     //cleanup expired roll vectors
 
     map_lock.lock();
-    for (auto& [ident, vec] : roll_map)
-    {
-        if (vec.size() && currentTime_t - vec.front().timestamp > 120)
-            vec.clear();
-    }
+    //for (auto& [ident, vec] : roll_map)
+    //{
+    //    if (vec.size() && currentTime_t - vec.front().timestamp > 120)
+    //        vec.clear();
+    //}
 
 
 

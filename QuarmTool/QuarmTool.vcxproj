@@ -166,6 +166,7 @@
     <ClCompile Include="RollParser.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="UI.cpp" />
+    <ClCompile Include="UserGeneratedParser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CHParser.h" />
@@ -188,6 +189,7 @@
     <ClInclude Include="RollParser.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="UI.h" />
+    <ClInclude Include="UserGeneratedParser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

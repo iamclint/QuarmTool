@@ -8,9 +8,12 @@
 #include "ImGuiWidgets.h"
 
 
-bool parseMessage(const std::string& message, CHCast& ref_cast)
+bool CHParser::parseMessage(const std::string& message, CHCast& ref_cast)
 {
-    std::regex pattern(R"((\w+) (say(?:s)?,|tells the raid(?:s)?,|shouts(?:,)?|tells the guild(?:s)?,|says out of character(?:s)?,) '(\w+)\s+CH\s+.*?\s*(\w+)'\s*)");
+    if (current_regex == "")
+        current_regex = base_regex;
+    std::regex pattern(current_regex);
+    //std::regex pattern(R"((\w+) (say(?:s)?,|tells the raid(?:s)?,|shouts(?:,)?|tells the guild(?:s)?,|says out of character(?:s)?,) '(\w+)\s+CH\s+.*?\s*(\w+)'\s*)");
     // Use std::smatch to store the matched groups
     std::smatch matches;
 

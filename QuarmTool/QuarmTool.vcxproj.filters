@@ -81,6 +81,9 @@
     <ClCompile Include="DKPParser.cpp">
       <Filter>Sources\Parsers</Filter>
     </ClCompile>
+    <ClCompile Include="UserGeneratedParser.cpp">
+      <Filter>Sources\Parsers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h">
@@ -141,6 +144,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="DKPParser.h">
+      <Filter>Headers\Parsers</Filter>
+    </ClInclude>
+    <ClInclude Include="UserGeneratedParser.h">
       <Filter>Headers\Parsers</Filter>
     </ClInclude>
   </ItemGroup>
