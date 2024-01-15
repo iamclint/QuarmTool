@@ -63,13 +63,65 @@ void FolderSelectQuarm()
 	f.detach();
 }
 
+void SelectLog()
+{
+	static QuarmTool* qt = QuarmTool::GetInst();
+	if (!qt)
+	{
+		qt = QuarmTool::GetInst();
+		return;
+	}
+
+	std::thread f = std::thread([]()
+		{
+			static QuarmTool* qt = QuarmTool::GetInst();
+
+			// Initialize the COM library
+			CoInitialize(NULL);
+
+			// Initialize the OPENFILENAME structure
+			OPENFILENAMEA ofn = { 0 };
+			char szFile[MAX_PATH] = { 0 };
+
+			ofn.lStructSize = sizeof(OPENFILENAME);
+			ofn.lpstrFile = szFile;
+			ofn.nMaxFile = MAX_PATH;
+			ofn.lpstrFilter = "Log Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
+			ofn.nFilterIndex = 1;
+			ofn.lpstrTitle = "Select a log file";
+			ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+
+			// Set the initial directory
+			ofn.lpstrInitialDir = qt->pSettings->game_path.c_str();  // Set your desired start path here
+
+			// Show the File Dialog
+			if (GetOpenFileNameA(&ofn))
+			{
+
+				qt->pLogMonitor->ReadLogFile(szFile);
+			}
+
+			// Uninitialize the COM library
+			CoUninitialize();
+		});
+	f.detach();
+}
+
 
 void draw_debug()
 {
 	static QuarmTool* qt = QuarmTool::GetInst();
 	ImGui::Text(qt->pSettings->game_path.c_str());
+	ImGui::Text(qt->pLogMonitor->active_log.c_str());
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	
+	if (ImGui::Button("Sort Logs"))
+	{
+		qt->pLogMonitor->SortLog();
+	}
+	if (ImGui::Button("Read Log"))
+	{
+		SelectLog();
+	}
 }
 
 
@@ -85,14 +137,13 @@ void setup_scheme()
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 	colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 	colors[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.06f, 0.06f, 0.94f);
-	colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+	colors[ImGuiCol_ChildBg] = ImVec4(0.09f, 0.09f, 0.09f, 0.94f);
+	colors[ImGuiCol_PopupBg] = ImVec4(0.18f, 0.18f, 0.18f, 0.94f);
 	colors[ImGuiCol_Border] = ImVec4(0.0f, 0.0f, 0.0f, 0.50f);
 	colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 	colors[ImGuiCol_FrameBg] = ImVec4(0.16f, 0.29f, 0.48f, 0.54f);
 	colors[ImGuiCol_FrameBgHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
 	colors[ImGuiCol_FrameBgActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-	
 	colors[ImGuiCol_TitleBg] = ImVec4(0.0929204, 0.0929204, 0.0929204, .9);
 	colors[ImGuiCol_TitleBgActive] = ImVec4(0.0929204, 0.0929204, 0.0929204, 1);
 	colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
@@ -104,12 +155,12 @@ void setup_scheme()
 	colors[ImGuiCol_CheckMark] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
 	colors[ImGuiCol_SliderGrab] = ImVec4(0.24f, 0.52f, 0.88f, 1.00f);
 	colors[ImGuiCol_SliderGrabActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-	colors[ImGuiCol_Button] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-	colors[ImGuiCol_ButtonHovered] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-	colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
-	colors[ImGuiCol_Header] = ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
-	colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
-	colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+	colors[ImGuiCol_Button] = ImVec4(0.25f, 0.25f, 0.25f, 0.90f);
+	colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.25f, 0.25f, 0.80f);// ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+	colors[ImGuiCol_ButtonActive] = ImVec4(0.25f, 0.25f, 0.25f, 0.90f);
+	colors[ImGuiCol_Header] = ImVec4(0.25f, 0.25f, 0.25f, 0.90f);// ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
+	colors[ImGuiCol_HeaderHovered] = ImVec4(0.25f, 0.25f, 0.25f, 0.80f);// ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
+	colors[ImGuiCol_HeaderActive] = ImVec4(0.25f, 0.25f, 0.25f, 0.90f);
 	colors[ImGuiCol_Separator] = colors[ImGuiCol_Border];
 	colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
 	colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
@@ -139,6 +190,7 @@ void setup_scheme()
 	colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+
 }
 
 void Drawing::Draw()
@@ -159,6 +211,9 @@ void Drawing::Draw()
 			FolderSelectQuarm();
 		if (first_run)
 		{
+			qt->pLogMonitor->active_log = qt->pSettings->last_log_file;
+			if (qt->pSettings->auto_sort_logs)
+				qt->pLogMonitor->SortLog();
 			//ImGui::PushStyleColor(ImGuiCol_TitleBg, );
 			setup_scheme();
 		}
@@ -175,36 +230,93 @@ void Drawing::Draw()
 					{
 						FolderSelectQuarm();
 					}
+					if (ImGui::MenuItem("Load Log", "Ctrl+L"))
+					{
+						SelectLog();
+					}
 					ImGui::EndMenu();
 				}
-
+				ImGui::Text("Log Monitoring:");
+				ImGui::SameLine();
+				if (qt->pLogMonitor->is_monitoring)
+				{
+					ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0.0f, 0.5f, 0.0f).Value);
+					ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2);
+					if (ImGui::Button("Enabled"))
+						qt->pLogMonitor->is_monitoring = false;
+					if (ImGui::IsItemHovered())
+						ImGui::SetTooltip("Click to disable active monitoring of your log");
+					ImGui::PopStyleColor();
+				}
+				else
+				{
+					ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0.5f, 0.0f, 0.0f).Value);
+					ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2);
+					if (ImGui::Button("Disabled"))
+						qt->pLogMonitor->is_monitoring = true;
+					if (ImGui::IsItemHovered())
+							ImGui::SetTooltip("Click to enable active monitoring of your log");
+					ImGui::PopStyleColor();
+				}
 				ImGui::EndMenuBar();
 			}
-			if (ImGui::BeginTabBar("Tabs"))
+		
+			static int tab_sel = 0;
+			ImVec2 cursor_pos = ImGui::GetCursorPos();
+			ImGui::BeginChild("TabSelect##Xdrs46VxVhqmBXf", { 200.f,0.f }, 1, 0);
 			{
-				if (ImGui::BeginTabItem("Debug"))
+				static ImVec2 size_child_window1 = { 1,1 };
+				ImVec2 cursor_pos = ImGui::GetCursorPos();
+				ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5, 0.5));
+				if (ImGui::Selectable("/rand", tab_sel == 0, 0, { 0.f,40.f }))
 				{
-					draw_debug();
-					ImGui::EndTabItem();
+					tab_sel = 0;
 				}
-				if (ImGui::BeginTabItem("Rolls"))
+				if (ImGui::Selectable("dkp", tab_sel==1, 0, { 0.f,40.f }))
 				{
-					qt->pLogMonitor->rolls->draw();
-					ImGui::EndTabItem();
+					tab_sel = 1;
 				}
-				if (ImGui::BeginTabItem("CH Chain"))
+				if (ImGui::Selectable("complete heal", tab_sel == 2, 0, { 0.f,40.f }))
 				{
-					qt->pLogMonitor->ch->draw_ui();
-					ImGui::EndTabItem();
+					tab_sel = 2;
 				}
-				if (ImGui::BeginTabItem("DKP"))
+				if (ImGui::Selectable("settings", tab_sel == 3, 0, { 0.f,40.f }))
 				{
-					qt->pLogMonitor->dkp->draw();
-					ImGui::EndTabItem();
+					tab_sel = 3;
 				}
-				ImGui::EndTabBar();
+				if (ImGui::Selectable("debug", tab_sel == -1, 0, { 0.f,40.f }))
+				{
+					tab_sel = -1;
+				}
+				ImGui::EndChild();
 			}
-
+			ImGui::SameLine();
+			ImGui::BeginChild("child window##TTAfzgjBodFBR6y", { 0.f,0.f }, 1, 0);
+			{
+				ImVec2 cursor_pos = ImGui::GetCursorPos();
+				switch (tab_sel)
+				{
+				case 0:
+					qt->pLogMonitor->rolls->draw();
+					break;
+				case 1:
+					qt->pLogMonitor->dkp->draw();
+					break;
+				case 2:
+					qt->pLogMonitor->ch->draw_ui();
+					break;
+				case 3:
+					qt->pSettings->draw();
+					break;
+				case -1:
+					draw_debug();
+					break;
+				default:
+					qt->pLogMonitor->rolls->draw();
+					break;
+				}
+				ImGui::EndChild();
+			}
 
 		}
 		ImGui::End();

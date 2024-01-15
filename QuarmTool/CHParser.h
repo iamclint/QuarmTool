@@ -36,7 +36,8 @@ public:
 	CHParser();
 	~CHParser();
 private:
-	const std::string base_regex = R"((\w+) (say(?:s)?,|tell(?:s)? the raid,|shout(?:s)?,|tell(?:s)? the guild,|say(?:s)? out of character,) '(\w+) CH .*?\s*(\w+)'\s*)";
+	const std::string base_regex = R"((\w+) \b[^']*'(\w+) ch [\W\w]? ?(\w+)')";
+	//const std::string base_regex = R"((\w+) (say(?:s)?,|tell(?:s)? the raid,|shout(?:s)?,|tell(?:s)? the guild,|say(?:s)? out of character,) '(\w+) CH .*?\s*(\w+)'\s*)";
 	bool parseMessage(const std::string& message, CHCast& ref_cast);
 };
 

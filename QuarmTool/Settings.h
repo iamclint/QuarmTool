@@ -9,6 +9,8 @@ private:
 	const char* filename = "QuarmTool.xml";
 public:
 	std::string game_path="";
+	std::string last_log_file = "";
+	bool auto_sort_logs = false;
 
 
 	template<typename X>
@@ -59,6 +61,7 @@ public:
 			return X(); // Return a default-constructed X or handle the error accordingly
 		}
 	}
+	void draw();
 	Settings();
 	~Settings() {};
 };

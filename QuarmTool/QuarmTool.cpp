@@ -10,7 +10,7 @@ QuarmTool::QuarmTool()
 }
 QuarmTool::~QuarmTool()
 {
-	delete pInst;
+	//delete pInst;
 }
 
 QuarmTool* QuarmTool::GetInst()

@@ -12,7 +12,7 @@ bool CHParser::parseMessage(const std::string& message, CHCast& ref_cast)
 {
     if (current_regex == "")
         current_regex = base_regex;
-    std::regex pattern(current_regex);
+    std::regex pattern(current_regex, std::regex_constants::icase);
     //std::regex pattern(R"((\w+) (say(?:s)?,|tells the raid(?:s)?,|shouts(?:,)?|tells the guild(?:s)?,|says out of character(?:s)?,) '(\w+)\s+CH\s+.*?\s*(\w+)'\s*)");
     // Use std::smatch to store the matched groups
     std::smatch matches;
@@ -20,12 +20,13 @@ bool CHParser::parseMessage(const std::string& message, CHCast& ref_cast)
     // Try to match the pattern in the message
     if (std::regex_match(message, matches, pattern))
     {
+        OutputDebugStringA(("Matches: " + std::to_string((int)matches.size())).c_str());
         // Output the matched names
-        if (matches.size() == 5)  // Ensure we have four captured groups
+        if (matches.size() == 4)  // Ensure we have four captured groups
         {
             ref_cast.caster = matches[1];
-            ref_cast.identifier = matches[3];
-            ref_cast.target = matches[4];
+            ref_cast.identifier = matches[2];
+            ref_cast.target = matches[3];
             ref_cast.cast_time = spell::CompleteHeal;
             return true;
         }
@@ -36,7 +37,6 @@ bool CHParser::parseMessage(const std::string& message, CHCast& ref_cast)
 
 void CHParser::parse_data(std::time_t timestamp, std::string data)
 {
-    OutputDebugStringA(data.c_str());
     CHCast tmp_cast;
     tmp_cast.casting_timestamp = timestamp;
     if (parseMessage(data, tmp_cast))

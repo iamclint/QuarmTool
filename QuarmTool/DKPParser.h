@@ -12,13 +12,14 @@ struct DKPBid
 	std::string item;
 	int dkp;
 	std::string comments;
+    std::time_t timestamp;
 	// Constructor to initialize the struct members
 	DKPBid() : dkp(0) {};
-	DKPBid(const std::string& player, const std::string& item, int dkp, const std::string& comments)
-		: player(player), item(item), dkp(dkp), comments(comments) {}
+	DKPBid(const std::string& player, const std::string& item, int dkp, const std::string& comments, const std::time_t timestamp)
+		: player(player), item(item), dkp(dkp), comments(comments), timestamp(timestamp) {}
 
-    DKPBid(const std::string& player, const std::string& item, const std::string& dkp, const std::string& comments)
-        : player(player), item(item), comments(comments) {
+    DKPBid(const std::string& player, const std::string& item, const std::string& dkp, const std::string& comments, const std::time_t timestamp)
+        : player(player), item(item), comments(comments), timestamp(timestamp) {
 
         try {
             // Attempt to convert the string to an integer
@@ -49,7 +50,8 @@ public:
 	DKPParser();
 	~DKPParser();
 private:
-    const std::string base_regex = R"((\w+) (?:tells|say(?:s)?,).+?'(\w.+?) ?; ?(\d+) ?; ?(\w+) ?(?:Gratss)? ?(?:;)?(?: )?(.+?)'\s)";
+    //const std::string base_regex = R"((\w+) \b[^']*'(\w.+?) ?; ?(\d+) ?; ?(\w+) ?(?:Gratss)? ?(?:;)?(?: )?(.+?)')";
+    const std::string base_regex = R"((\w+) [^']*'([\w\s]+); ?(\d+) ?; ?(\w+)[\w\s]+;? ?([\w\W]+)')";
     bool parseMessage(const std::string& message, DKPBid& bid);
 };
 

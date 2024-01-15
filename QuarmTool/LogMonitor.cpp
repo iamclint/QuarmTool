@@ -3,6 +3,8 @@
 #include <iostream>
 #include <Windows.h>
 
+namespace fs = std::filesystem;
+
 LogMonitor::LogMonitor()
 {
     
@@ -11,6 +13,180 @@ LogMonitor::LogMonitor()
     dkp = std::shared_ptr<DKPParser>(new DKPParser);
     UpdateFolder();
 }
+
+bool areSameDay(time_t time1, time_t time2) {
+    // Convert time_t to tm structures
+    
+    struct tm tm1;
+    struct tm tm2;
+    gmtime_s(&tm1, &time1);
+    gmtime_s(&tm2, &time2);
+
+    // Compare year, month, and day components
+    return (tm1.tm_year == tm2.tm_year) &&
+        (tm1.tm_mon == tm2.tm_mon) &&
+        (tm1.tm_mday == tm2.tm_mday);
+}
+
+bool areSameDay(std::tm time1, std::tm time2) {
+    // Compare year, month, and day components
+    return (time1.tm_year == time2.tm_year) &&
+        (time1.tm_mon == time2.tm_mon) &&
+        (time1.tm_mday == time2.tm_mday);
+}
+
+void log_data(std::tm& timestamp, const std::string& data)
+{
+    static QuarmTool* qt = QuarmTool::GetInst();
+    std::string path = qt->pSettings->game_path + "\\" + "sorted logs";
+    if (!(fs::exists(path) && fs::is_directory(path)))
+    {
+        fs::create_directories(path);
+    }
+    std::stringstream ss;
+    ss << path << "\\" << timestamp.tm_mon+1 << "-" << timestamp.tm_mday << "-" << 1900+timestamp.tm_year << ".txt";
+    std::ofstream out_file;
+    out_file.open(ss.str(), std::ios::app);
+    out_file << data << std::endl;
+    out_file.close();
+}
+
+
+void LogMonitor::TruncateLog(int line_index)
+{
+    static QuarmTool* qt = QuarmTool::GetInst();
+    const std::string inputFileName = qt->pSettings->game_path + "\\" + active_log;
+    const std::string outputFileName = qt->pSettings->game_path + "\\" + active_log;
+
+    std::ifstream inputFile(inputFileName);
+    std::vector<std::string> lines;
+
+    // Read the file content
+    std::string line;
+    while (std::getline(inputFile, line)) {
+        lines.push_back(line);
+    }
+
+    inputFile.close();  // Close the input file
+
+    // Open the output file for writing
+    std::ofstream outputFile(outputFileName, std::ios::trunc);
+
+    // Write the lines back to the file, excluding the first 1000 lines
+    for (size_t i = line_index; i < lines.size(); ++i) {
+        outputFile << lines[i] << "\n";
+    }
+
+    outputFile.close();  // Close the output file
+}
+
+void LogMonitor::SortLog()
+{
+    if (active_log == "")
+        return;
+   // auto currentTime = std::chrono::system_clock::now();
+   // auto currentTime_t = std::chrono::system_clock::to_time_t(currentTime);
+
+    // Get the current time in seconds since the epoch
+    std::time_t currentTime = std::time(nullptr);
+
+    // Convert the time to the local time using std::localtime
+    std::tm localTime; 
+    localtime_s(&localTime, & currentTime);
+
+
+    static QuarmTool* qt = QuarmTool::GetInst();
+    std::ifstream file(qt->pSettings->game_path + "\\" + active_log, std::ios::binary);
+    while (!file.is_open())
+    {
+        file = std::ifstream(qt->pSettings->game_path + "\\" + active_log, std::ios::binary);
+        Sleep(10);
+    }
+    
+    if (file.is_open()) {
+        // Determine the size of the file
+        //file.seekg(0, std::ios::end);
+        std::streamsize fileSize = file.tellg();
+        std::string line;
+        std::tm prev_time = {};
+        std::stringstream current_data;
+        bool new_day = true;
+        int line_index = 1;
+        while (std::getline(file, line, '\n'))
+        {
+            if (line.length() > 24)
+            {
+                std::string timestampStr = line.substr(1, 24);
+
+                // Creating an input string stream for parsing
+                std::istringstream iss(timestampStr);
+
+                // Formatting to match the timestamp format
+                std::tm tm_time = {};
+                iss >> std::get_time(&tm_time, "%a %b %d %H:%M:%S %Y");
+                time_t line_timestamp = std::mktime(&tm_time);
+
+                if (areSameDay(tm_time, prev_time) || new_day)
+                {
+                    current_data << line << "\n";
+                    new_day = false;
+                }
+                else
+                {
+                    log_data(prev_time, current_data.str());
+                    current_data.clear();
+                    current_data.str("");
+                    new_day = true;
+                }
+
+                if (areSameDay(localTime, tm_time))
+                {
+                    break;
+                }
+                prev_time = tm_time;
+                line_index++;
+            }
+       }
+
+        file.close();
+        TruncateLog(line_index);
+
+    }
+    else {
+        std::cerr << "Error opening file: " << active_log << std::endl;
+    }
+}
+void LogMonitor::ReadLogFile(std::string path)
+{
+    is_monitoring = false;
+    auto currentTime = std::chrono::system_clock::now();
+    auto currentTime_t = std::chrono::system_clock::to_time_t(currentTime);
+    static QuarmTool* qt = QuarmTool::GetInst();
+    std::ifstream file(path, std::ios::binary);
+    while (!file.is_open())
+    {
+        file = std::ifstream(path, std::ios::binary);
+        Sleep(10);
+    }
+
+    if (file.is_open()) {
+        std::streamsize fileSize = file.tellg();
+        std::string line;
+        while (std::getline(file, line, '\r'))
+        {
+            line.erase(std::remove_if(line.begin(), line.end(),
+                [](char c) { return c == '\r' || c == '\n'; }),
+                line.end());
+
+                HandleNewLine(line, false);
+        }
+
+    }
+    else {
+        std::cerr << "Error opening file: " << active_log << std::endl;
+    }
+}
+
 
 std::string ConvertWideStringToAnsi(const wchar_t* wideStr, size_t length) {
     int bufferSize = WideCharToMultiByte(CP_ACP, 0, wideStr, static_cast<int>(length), NULL, 0, NULL, NULL);
@@ -35,7 +211,7 @@ std::string ConvertWideStringToAnsi(const wchar_t* wideStr, size_t length) {
 
     return result;
 }
-void LogMonitor::HandleNewLine(const std::string& data)
+void LogMonitor::HandleNewLine(const std::string& data, bool visuals)
 {
     // Extracting the timestamp substring
     if (data.length() < 27)
@@ -62,15 +238,23 @@ void LogMonitor::HandleNewLine(const std::string& data)
     std::string removed_stamp_data = data.substr(27, data.length() - 27);
 
     rolls->parse_data(timestamp_t, removed_stamp_data);
-    ch->parse_data(timestamp_t, removed_stamp_data);
     dkp->parse_data(timestamp_t, removed_stamp_data);
+    if (visuals)
+    {
+        ch->parse_data(timestamp_t, removed_stamp_data);
+    }
+    
 
 }
 void LogMonitor::HandleFileChange(std::string filename)
 {
+    if (!is_monitoring)
+        return;
     static QuarmTool* qt = QuarmTool::GetInst();
     if (filename.find("eqlog_") == 0 && filename.rfind("_pq.proj.txt") == (filename.length() - strlen("_pq.proj.txt")))
     { 
+        active_log = filename;
+        qt->pSettings->update("last_log", active_log);
         //a project quarm log file has been modified
         std::ifstream file(qt->pSettings->game_path + "\\" + filename, std::ios::binary);
 
@@ -86,27 +270,38 @@ void LogMonitor::HandleFileChange(std::string filename)
             file.seekg(0, std::ios::end);
             std::streamsize fileSize = file.tellg();
 
-            // Read only the new content since the last check
+            //// Read only the new content since the last check
+            //if (!last_read_pos[filename])
+            //{
+            //    int pos = file.tellg();
+            //    // Start from the end and move backward until a newline character is found
+
+            //    for (int i = 0; i < 2; i++)
+            //    {
+            //        file.seekg(-2, std::ios::cur); // Move one character back from the end
+            //        while (file.tellg() > 0 && file.peek() != '\n') {
+            //            file.seekg(-1, std::ios::cur);
+            //        }
+            //    }
+            //    //last_read_pos[filename] = file.tellg(); //got a new base to start reading from
+            //}
+            //else
+            //    file.seekg(last_read_pos[filename], std::ios::beg);
+
             if (!last_read_pos[filename])
             {
-                int pos = file.tellg();
-                // Start from the end and move backward until a newline character is found
-
-                for (int i = 0; i < 2; i++)
-                {
-                    file.seekg(-2, std::ios::cur); // Move one character back from the end
-                    while (file.tellg() > 0 && file.peek() != '\n') {
-                        file.seekg(-1, std::ios::cur);
-                    }
-                }
-                //last_read_pos[filename] = file.tellg(); //got a new base to start reading from
+                last_read_pos[filename] = fileSize;
+                file.seekg(0, std::ios::end);
             }
             else
                 file.seekg(last_read_pos[filename], std::ios::beg);
-
+            
             // Read the contents into a vector of lines
             std::string line;
-            while (std::getline(file, line)) {
+            while (std::getline(file, line, '\n')) {
+                line.erase(std::remove_if(line.begin(), line.end(),
+                    [](char c) { return c == '\r' || c == '\n'; }),
+                    line.end());
                 // Process the new line
                 HandleNewLine(line);
             }

@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <unordered_map>
 #include <mutex>
+#include <deque>
 
 struct roll_data
 {
@@ -21,8 +22,8 @@ class RollParser
 {
 public:
 	void parse_data(std::time_t timestamp, std::string data);
-	std::unordered_map<int, std::vector<roll_data>> roll_map;
-	std::unordered_map<int, std::vector<roll_data>> expired_rolls;
+	std::unordered_map<int, std::deque<roll_data>> roll_map;
+	std::deque<std::deque<roll_data>> expired_rolls;
 	bool validate_roll(int identifier);
 	std::mutex map_lock;
 	void check_expired(int id);
