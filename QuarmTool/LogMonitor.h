@@ -8,6 +8,7 @@
 #include "RollParser.h"
 #include "CHParser.h"
 #include "DKPParser.h"
+#include "UserGeneratedParser.h"
 class LogMonitor
 {
 public:
@@ -17,6 +18,7 @@ public:
 	std::shared_ptr<class RollParser> rolls;
 	std::shared_ptr<class CHParser> ch;
 	std::shared_ptr<class DKPParser> dkp;
+	std::shared_ptr<class UserGeneratedParser> user;
 	std::string active_log = "";
 	void ReadLogFile(std::string path);
 	void SortLog();

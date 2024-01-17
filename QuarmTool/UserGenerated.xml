@@ -1,0 +1,22 @@
+[
+    {
+        "display": "{1} test display",
+        "duration": 10000,
+        "enabled": true,
+        "event_type": 4,
+        "match": "(\\w+) fizzles",
+        "name": "test",
+        "sound_path": "",
+        "type": 1
+    },
+    {
+        "display": "some notification {1}",
+        "duration": 0,
+        "enabled": true,
+        "event_type": 2,
+        "match": "(\\w+) is awesome",
+        "name": "test2",
+        "sound_path": "",
+        "type": 1
+    }
+]

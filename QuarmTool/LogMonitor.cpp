@@ -11,6 +11,7 @@ LogMonitor::LogMonitor()
     rolls = std::shared_ptr<RollParser>(new RollParser);
     ch = std::shared_ptr<CHParser>(new CHParser);
     dkp = std::shared_ptr<DKPParser>(new DKPParser);
+    user = std::shared_ptr<UserGeneratedParser>(new UserGeneratedParser);
     UpdateFolder();
 }
 
@@ -239,6 +240,7 @@ void LogMonitor::HandleNewLine(const std::string& data, bool visuals)
 
     rolls->parse_data(timestamp_t, removed_stamp_data);
     dkp->parse_data(timestamp_t, removed_stamp_data);
+    user->parse_data(timestamp_t, removed_stamp_data);
     if (visuals)
     {
         ch->parse_data(timestamp_t, removed_stamp_data);

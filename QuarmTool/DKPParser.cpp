@@ -38,12 +38,7 @@ void DKPParser::draw()
         {
             static ImVec2 size_table1 = { 1,1 };
             ImVec2 cursor_pos = ImGui::GetCursorPos();
-            ImGui::TableSetupColumn("Time");
-            ImGui::TableSetupColumn("Item");
-            ImGui::TableSetupColumn("Dkp");
-            ImGui::TableSetupColumn("Player");
-            ImGui::TableSetupColumn("Comments");
-            ImGui::TableHeadersRow();
+
             for (auto& d : wins)
             {
                 std::tm localTime;

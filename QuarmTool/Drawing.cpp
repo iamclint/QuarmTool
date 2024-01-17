@@ -280,10 +280,15 @@ void Drawing::Draw()
 				{
 					tab_sel = 2;
 				}
+				if (ImGui::Selectable("user parses", tab_sel == 4, 0, { 0.f,40.f }))
+				{
+					tab_sel = 4;
+				}
 				if (ImGui::Selectable("settings", tab_sel == 3, 0, { 0.f,40.f }))
 				{
 					tab_sel = 3;
 				}
+
 				if (ImGui::Selectable("debug", tab_sel == -1, 0, { 0.f,40.f }))
 				{
 					tab_sel = -1;
@@ -307,6 +312,9 @@ void Drawing::Draw()
 					break;
 				case 3:
 					qt->pSettings->draw();
+					break;
+				case 4:
+					qt->pLogMonitor->user->draw_ui();
 					break;
 				case -1:
 					draw_debug();
