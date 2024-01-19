@@ -151,6 +151,7 @@
     <ClCompile Include="DKPParser.cpp" />
     <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="GameWindowMonitor.cpp" />
+    <ClCompile Include="ImConfirmation.cpp" />
     <ClCompile Include="ImGuiWidgets.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_demo.cpp" />
@@ -162,9 +163,11 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="LogMonitor.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Notifications.cpp" />
     <ClCompile Include="QuarmTool.cpp" />
     <ClCompile Include="RollParser.cpp" />
     <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="Timers.cpp" />
     <ClCompile Include="UI.cpp" />
     <ClCompile Include="UserGeneratedParser.cpp" />
   </ItemGroup>
@@ -173,6 +176,7 @@
     <ClInclude Include="DKPParser.h" />
     <ClInclude Include="Drawing.h" />
     <ClInclude Include="GameWindowMonitor.h" />
+    <ClInclude Include="ImConfirmation.h" />
     <ClInclude Include="ImGuiWidgets.h" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />
@@ -184,10 +188,12 @@
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="LogMonitor.h" />
+    <ClInclude Include="Notifications.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="QuarmTool.h" />
     <ClInclude Include="RollParser.h" />
     <ClInclude Include="Settings.h" />
+    <ClInclude Include="Timers.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="UserGeneratedParser.h" />
   </ItemGroup>

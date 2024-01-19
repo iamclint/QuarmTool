@@ -2,11 +2,12 @@
 #include <string>
 #include <ctime>
 #include "nlohmann/json.hpp"
-enum class MatchType
+#include <functional>
+enum class MatchType_
 {
-    none,
-	regex,
-	string
+    MatchType_none,
+    MatchType_regex,
+    MatchType_string
 };
 
 enum MatchEvent_
@@ -20,19 +21,20 @@ enum MatchEvent_
 
 struct ParseInfo
 {
-	std::string match;
+	std::string pattern;
     std::string name;
-	MatchType type;
+    MatchType_ match_type;
 	MatchEvent_ event_type;
     std::string display;
     std::string sound_path;
+    std::string test_data;
     int duration;
     bool enabled;
     // Default constructor
-    ParseInfo() : type(MatchType::regex), event_type(MatchEvent_None), enabled(true) {}
+    ParseInfo() : match_type(MatchType_::MatchType_regex), event_type(MatchEvent_None), enabled(true) {}
 
-    ParseInfo(const std::string& name_, const std::string& match_, const std::string& display_, int duration_, const std::string& sound_path_, MatchType type_, MatchEvent_ event_type_, bool enabled_)
-        : match(match_), type(type_), event_type(event_type_), enabled(enabled_), name(name_), display(display_), sound_path(sound_path_), duration(duration_) {}
+    ParseInfo(const std::string& name_, const std::string& pattern_, const std::string& display_, int duration_, const std::string& sound_path_, MatchType_ type_, MatchEvent_ event_type_, bool enabled_)
+        : pattern(pattern_), match_type(type_), event_type(event_type_), enabled(enabled_), name(name_), display(display_), sound_path(sound_path_), duration(duration_) {}
 
     ~ParseInfo() {}
 
@@ -41,10 +43,10 @@ struct ParseInfo
     {
         j = {
             {"name", name},
-            {"match", match},
+            {"match", pattern},
             {"display", display},
             {"sound_path", sound_path},
-            {"type", static_cast<int>(type)},
+            {"type", static_cast<int>(match_type)},
             {"event_type", static_cast<int>(event_type)},
             {"enabled", enabled},
             {"duration", duration}
@@ -54,8 +56,8 @@ struct ParseInfo
     // Deserialize from JSON
     void from_json(const nlohmann::json& j)
     {
-        j.at("match").get_to(match);
-        j.at("type").get_to(type);
+        j.at("match").get_to(pattern);
+        j.at("type").get_to(match_type);
         j.at("event_type").get_to(event_type);
         j.at("enabled").get_to(enabled);
         j.at("name").get_to(name);
@@ -75,6 +77,7 @@ public:
 	void draw();
     nlohmann::json get_vec();
     void write_vec();
+    ParseInfo* active_parse;
     UserGeneratedParser();
     ~UserGeneratedParser();
 };

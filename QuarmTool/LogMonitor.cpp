@@ -2,7 +2,7 @@
 #include "QuarmTool.h"
 #include <iostream>
 #include <Windows.h>
-
+#include <limits>
 namespace fs = std::filesystem;
 
 LogMonitor::LogMonitor()
@@ -240,9 +240,9 @@ void LogMonitor::HandleNewLine(const std::string& data, bool visuals)
 
     rolls->parse_data(timestamp_t, removed_stamp_data);
     dkp->parse_data(timestamp_t, removed_stamp_data);
-    user->parse_data(timestamp_t, removed_stamp_data);
     if (visuals)
     {
+        user->parse_data(timestamp_t, removed_stamp_data);
         ch->parse_data(timestamp_t, removed_stamp_data);
     }
     
@@ -258,12 +258,12 @@ void LogMonitor::HandleFileChange(std::string filename)
         active_log = filename;
         qt->pSettings->update("last_log", active_log);
         //a project quarm log file has been modified
-        std::ifstream file(qt->pSettings->game_path + "\\" + filename, std::ios::binary);
+        std::ifstream file(qt->pSettings->game_path + "\\" + filename, std::ios::in);
 
 
         while (!file.is_open())
         {
-            file = std::ifstream(qt->pSettings->game_path + "\\" + filename, std::ios::binary);
+            file = std::ifstream(qt->pSettings->game_path + "\\" + filename, std::ios::in);
             Sleep(10);
         }
 
@@ -272,42 +272,26 @@ void LogMonitor::HandleFileChange(std::string filename)
             file.seekg(0, std::ios::end);
             std::streamsize fileSize = file.tellg();
 
-            //// Read only the new content since the last check
-            //if (!last_read_pos[filename])
-            //{
-            //    int pos = file.tellg();
-            //    // Start from the end and move backward until a newline character is found
-
-            //    for (int i = 0; i < 2; i++)
-            //    {
-            //        file.seekg(-2, std::ios::cur); // Move one character back from the end
-            //        while (file.tellg() > 0 && file.peek() != '\n') {
-            //            file.seekg(-1, std::ios::cur);
-            //        }
-            //    }
-            //    //last_read_pos[filename] = file.tellg(); //got a new base to start reading from
-            //}
-            //else
-            //    file.seekg(last_read_pos[filename], std::ios::beg);
-
-            if (!last_read_pos[filename])
-            {
+            auto it = last_read_pos.find(filename);
+            if (it == last_read_pos.end()) {
                 last_read_pos[filename] = fileSize;
-                file.seekg(0, std::ios::end);
+                return;
             }
-            else
-                file.seekg(last_read_pos[filename], std::ios::beg);
+                
             
+            file.seekg(last_read_pos[filename], std::ios::beg);
+            last_read_pos[filename] = fileSize;
+
             // Read the contents into a vector of lines
             std::string line;
-            while (std::getline(file, line, '\n')) {
+            while (std::getline(file, line)) {
                 line.erase(std::remove_if(line.begin(), line.end(),
                     [](char c) { return c == '\r' || c == '\n'; }),
                     line.end());
                 // Process the new line
                 HandleNewLine(line);
             }
-            last_read_pos[filename] = fileSize;
+        
         }
         else {
             std::cerr << "Error opening file: " << filename << std::endl;

@@ -212,8 +212,8 @@ void Drawing::Draw()
 		if (first_run)
 		{
 			qt->pLogMonitor->active_log = qt->pSettings->last_log_file;
-			if (qt->pSettings->auto_sort_logs)
-				qt->pLogMonitor->SortLog();
+		//	if (qt->pSettings->auto_sort_logs)
+		//		qt->pLogMonitor->SortLog();
 			//ImGui::PushStyleColor(ImGuiCol_TitleBg, );
 			setup_scheme();
 		}
@@ -284,10 +284,15 @@ void Drawing::Draw()
 				{
 					tab_sel = 4;
 				}
+				if (ImGui::Selectable("timers", tab_sel == 5, 0, { 0.f,40.f }))
+				{
+					tab_sel = 5;
+				}
 				if (ImGui::Selectable("settings", tab_sel == 3, 0, { 0.f,40.f }))
 				{
 					tab_sel = 3;
 				}
+
 
 				if (ImGui::Selectable("debug", tab_sel == -1, 0, { 0.f,40.f }))
 				{
@@ -316,6 +321,9 @@ void Drawing::Draw()
 				case 4:
 					qt->pLogMonitor->user->draw_ui();
 					break;
+				case 5:
+					qt->pTimer->draw_ui();
+					break;
 				case -1:
 					draw_debug();
 					break;
@@ -327,8 +335,10 @@ void Drawing::Draw()
 			}
 
 		}
+		qt->pConfirmation->draw();
 		ImGui::End();
-
+		qt->pNotify->draw();
+	//	qt->pTimer->draw();
 		first_run = false;
 	}
 

@@ -84,6 +84,15 @@
     <ClCompile Include="UserGeneratedParser.cpp">
       <Filter>Sources\Parsers</Filter>
     </ClCompile>
+    <ClCompile Include="ImConfirmation.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Timers.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Notifications.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h">
@@ -148,6 +157,15 @@
     </ClInclude>
     <ClInclude Include="UserGeneratedParser.h">
       <Filter>Headers\Parsers</Filter>
+    </ClInclude>
+    <ClInclude Include="ImConfirmation.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Timers.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Notifications.h">
+      <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

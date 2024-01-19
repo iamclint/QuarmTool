@@ -6,7 +6,7 @@
 class Settings
 {
 private:
-	const char* filename = "QuarmTool.xml";
+	const char* filename = "QuarmTool.json";
 public:
 	std::string game_path="";
 	std::string last_log_file = "";

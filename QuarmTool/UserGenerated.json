@@ -1,0 +1,52 @@
+[
+    {
+        "display": "clarity ({1})",
+        "duration": 1620,
+        "enabled": true,
+        "event_type": 4,
+        "match": "(\\w+) (looks tranquil.)",
+        "name": "clarity",
+        "sound_path": "",
+        "type": 1
+    },
+    {
+        "display": "{1} fizzled",
+        "duration": 5,
+        "enabled": true,
+        "event_type": 4,
+        "match": "([\\w']+) (spell fizzles!)",
+        "name": "fizzle",
+        "sound_path": "",
+        "type": 1
+    },
+    {
+        "display": "Scribing {2}",
+        "duration": 15,
+        "enabled": true,
+        "event_type": 4,
+        "match": "(beginning to scribe )([\\w\\W]+)",
+        "name": "scribe",
+        "sound_path": "",
+        "type": 1
+    },
+    {
+        "display": "Sow ({1})",
+        "duration": 2100,
+        "enabled": true,
+        "event_type": 4,
+        "match": "(\\w+) (is surrounded by a brief lupine aura.)",
+        "name": "sow",
+        "sound_path": "",
+        "type": 1
+    },
+    {
+        "display": "{0} hailed you",
+        "duration": 4,
+        "enabled": true,
+        "event_type": 4,
+        "match": "Hail",
+        "name": "hail",
+        "sound_path": "",
+        "type": 2
+    }
+]
