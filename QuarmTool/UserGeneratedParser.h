@@ -31,7 +31,7 @@ struct ParseInfo
     int duration;
     bool enabled;
     // Default constructor
-    ParseInfo() : match_type(MatchType_::MatchType_regex), event_type(MatchEvent_None), enabled(true) {}
+    ParseInfo() : match_type(MatchType_::MatchType_regex), event_type(MatchEvent_None), enabled(true), duration(0) {}
 
     ParseInfo(const std::string& name_, const std::string& pattern_, const std::string& display_, int duration_, const std::string& sound_path_, MatchType_ type_, MatchEvent_ event_type_, bool enabled_)
         : pattern(pattern_), match_type(type_), event_type(event_type_), enabled(enabled_), name(name_), display(display_), sound_path(sound_path_), duration(duration_) {}

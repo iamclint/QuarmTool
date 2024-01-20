@@ -44,33 +44,17 @@ void TimerManager::draw_ui()
     {
         if (timers.size())
         {
-            //if (ImGui::BeginTable("timerstblbtns", 2, ImGuiTableFlags_SizingFixedSame))
-           // {
-            ///    ImGui::TableNextColumn();
                 if (selected_index == -1)
                     ImGui::BeginDisabled();
 
                 if (ImGui::Button("Delete"))
                 {
                     timers.erase(timers.begin() + selected_index);
-                    /*qt->pConfirmation->confirm("Confirm Deletion", "Are you sure you wish to delete timer: " + timers[selected_index].message, [this](bool t)
-                        {
-                            if (t)
-                            {
-                                timers.erase(timers.begin() + selected_index);
-                            }
-                            else
-                            {
-                                OutputDebugStringA("don't delete");
-                            }
-                            selected_index = -1;
-                        });*/
                 }
 
                 if (selected_index == -1)
                    ImGui::EndDisabled();
-             //   ImGui::EndTable();
-           //}
+
             if (ImGui::BeginTable("timerstbl", 2, ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_Resizable))
             {
                 for (int index = 0; auto & n : timers)

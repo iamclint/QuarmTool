@@ -19,6 +19,71 @@ std::vector<std::string> splitString(const std::string& input) {
 	return result;
 }
 
+void CopyToClipboard(const std::string& text) {
+	// Open the clipboard
+	if (OpenClipboard(NULL)) {
+		// Empty the clipboard
+		EmptyClipboard();
+
+		// Allocate global memory for the string
+		HGLOBAL hClipboardData = GlobalAlloc(GMEM_DDESHARE, text.size() + 1);
+		if (hClipboardData != NULL) {
+			// Lock the memory and copy the string
+			char* pClipboardData = static_cast<char*>(GlobalLock(hClipboardData));
+			if (pClipboardData != NULL) {
+				strcpy_s(pClipboardData, text.size() + 1, text.c_str());
+				GlobalUnlock(hClipboardData);
+
+				// Set the clipboard data
+				SetClipboardData(CF_TEXT, hClipboardData);
+			}
+		}
+
+		// Close the clipboard
+		CloseClipboard();
+	}
+}
+
+std::string ReadFromClipboard() {
+	std::string clipboardData;
+
+	// Open the clipboard
+	if (OpenClipboard(NULL)) {
+		// Get the clipboard data in CF_TEXT format
+		HANDLE hClipboardData = GetClipboardData(CF_TEXT);
+		if (hClipboardData != NULL) {
+			// Lock the memory and retrieve the text
+			char* pClipboardData = static_cast<char*>(GlobalLock(hClipboardData));
+			if (pClipboardData != NULL) {
+				clipboardData = pClipboardData;
+				GlobalUnlock(hClipboardData);
+			}
+		}
+
+		// Close the clipboard
+		CloseClipboard();
+	}
+
+	return clipboardData;
+}
+
+bool is_valid_json(const std::string& jsonString) {
+	try {
+		// Attempt to parse the JSON string
+		nlohmann::json jsonData = nlohmann::json::parse(jsonString);
+		if (!jsonData.is_object() || !jsonData.contains("match") || !jsonData.contains("name") || !jsonData.contains("display") || !jsonData.contains("sound_path") || !jsonData["duration"].is_number() ||
+			!jsonData["event_type"].is_number() || !jsonData["type"].is_number() || !jsonData["enabled"].is_boolean()) {
+			return false; // Structure doesn't match expectations
+		}
+
+		// The JSON string is valid and conforms to the structure
+		return true;
+	}
+	catch (const nlohmann::json::parse_error&) {
+		// Parsing failed, not valid JSON
+		return false;
+	}
+}
 
 UserGeneratedParser::UserGeneratedParser()
 {
@@ -42,15 +107,22 @@ UserGeneratedParser::UserGeneratedParser()
 void UserGeneratedParser::write_vec()
 {
 	std::ofstream outputFile("UserGenerated.json");
-	nlohmann::json jsonvec;
-	for (const auto& info : parses)
+	if (outputFile.is_open())
 	{
-		nlohmann::json jsonInfo;
-		info.to_json(jsonInfo);
-		jsonvec.push_back(jsonInfo);
+		nlohmann::json jsonvec;
+		for (const auto& info : parses)
+		{
+			nlohmann::json jsonInfo;
+			info.to_json(jsonInfo);
+			jsonvec.push_back(jsonInfo);
+		}
+		outputFile << jsonvec.dump(4) << std::endl;
+		outputFile.close();
 	}
-	outputFile << jsonvec.dump(4) << std::endl;
-	outputFile.close();
+	else
+	{
+		std::cout << "Error opening UserGenerated.json" << std::endl;
+	}
 }
 
 nlohmann::json UserGeneratedParser::get_vec()
@@ -112,20 +184,20 @@ std::vector<std::string> get_parse_matches(ParseInfo& parse, std::string& data, 
 
 void SelectSound()
 {
-	static QuarmTool* qt = QuarmTool::GetInst();
-	if (!qt)
-	{
-		qt = QuarmTool::GetInst();
-		return;
-	}
 
 	std::thread f = std::thread([]()
 		{
 			static QuarmTool* qt = QuarmTool::GetInst();
+			if (!qt)
+			{
+				qt = QuarmTool::GetInst();
+				return;
+			}
 
 			// Initialize the COM library
 			CoInitialize(NULL);
-
+			char currentDirectory[MAX_PATH];
+			GetCurrentDirectoryA(MAX_PATH, currentDirectory);
 			// Initialize the OPENFILENAME structure
 			OPENFILENAMEA ofn = { 0 };
 			char szFile[MAX_PATH] = { 0 };
@@ -146,6 +218,8 @@ void SelectSound()
 			{
 				qt->pLogMonitor->user->active_parse->sound_path = szFile;
 			}
+
+			SetCurrentDirectoryA(currentDirectory);
 
 			// Uninitialize the COM library
 			CoUninitialize();
@@ -249,10 +323,10 @@ void UserGeneratedParser::draw_ui()
 				{
 					std::stringstream ss;
 					ss << (int)active_parse->match_type << std::endl;
-					OutputDebugStringA(ss.str().c_str());
+					std::cout << ss.str() << std::endl;
 				}
 				if (active_parse->match_type == MatchType_::MatchType_regex)
-					ImGui::InputTextWithHint("pattern", "(\w+) (looks tranquil.)", &active_parse->pattern);
+					ImGui::InputTextWithHint("pattern", "(\\w+) (looks tranquil.)", &active_parse->pattern);
 				else
 					ImGui::InputTextWithHint("pattern", "looks tranquil.", &active_parse->pattern);
 				ImGui::CheckboxFlags("sound", (int*)&active_parse->event_type, (int)MatchEvent_Playsound);
@@ -268,7 +342,7 @@ void UserGeneratedParser::draw_ui()
 
 				if (active_parse->event_type & MatchEvent_TimerBar)
 				{
-					ImGui::InputInt("duration", &active_parse->duration);
+					ImGui::InputInt("duration in seconds", &active_parse->duration);
 				}
 				ImGui::InputText("display", &active_parse->display);
 				if (editing)
@@ -317,7 +391,8 @@ void UserGeneratedParser::draw_ui()
 
 				} catch(const std::exception& e) {
 					// Catch and handle the exception
-					ImGui::Text("Invalid Regex");
+					
+					ImGui::Text("Invalid Regex: %s", e.what());
 					//std::cerr << "Exception caught: " << e.what() << std::endl;
 				}
 
@@ -353,7 +428,7 @@ void UserGeneratedParser::draw_ui()
 					}
 					else
 					{
-						OutputDebugStringA("don't delete");
+						std::cout << "delete was cancelled" << std::endl;
 					}
 					selected = -1;
 				});
@@ -365,8 +440,8 @@ void UserGeneratedParser::draw_ui()
 		ImGui::EndTable();
 	}
 
-
-	if (ImGui::BeginTable("Parses", 7, ImGuiTableFlags_Resizable))
+	bool item_context = false;
+	if (ImGui::BeginTable("Parses", 8, ImGuiTableFlags_Resizable))
 	{
 		ImGui::TableSetupColumn("enabled");
 		ImGui::TableSetupColumn("name");
@@ -374,7 +449,8 @@ void UserGeneratedParser::draw_ui()
 		ImGui::TableSetupColumn("events");
 		ImGui::TableSetupColumn("match type");
 		ImGui::TableSetupColumn("display");
-		ImGui::TableSetupColumn("extra");
+		ImGui::TableSetupColumn("duration");
+		ImGui::TableSetupColumn("path");
 		ImGui::TableHeadersRow();
 		for (int index = 0; auto & e : parses)
 		{
@@ -384,6 +460,17 @@ void UserGeneratedParser::draw_ui()
 			ImGui::TableNextColumn();
 			if (ImGui::Selectable(("##" + std::to_string(index) + e.name).c_str(), selected == index, ImGuiSelectableFlags_SpanAllColumns))
 				selected = index;
+
+			if (ImGui::BeginPopupContextItem()) {
+				selected = index;
+				item_context = true;
+				if (ImGui::MenuItem("Copy")) {
+					nlohmann::json userparse;
+					e.to_json(userparse);
+					CopyToClipboard(userparse.dump());
+				}
+				ImGui::EndPopup();
+			}
 			ImGui::SameLine(-1);
 			ImGui::Text("%s", e.name.c_str());
 			ImGui::TableNextColumn();
@@ -405,16 +492,38 @@ void UserGeneratedParser::draw_ui()
 			ImGui::TableNextColumn();
 			ImGui::Text("%s", e.display.c_str());
 			ImGui::TableNextColumn();
-			if (e.event_type & MatchEvent_Playsound)
-				ImGui::Text("%s", e.sound_path.c_str());
 			if (e.event_type & MatchEvent_TimerBar)
 				ImGui::Text("%i", e.duration);
+			ImGui::TableNextColumn();
+			if (e.event_type & MatchEvent_Playsound)
+				ImGui::Text("%s", e.sound_path.c_str());
+
+
 
 			index++;
 		}
 		ImGui::EndTable();
 	}
+	
+	if (!item_context && ImGui::BeginPopupContextWindow()) {
 
+		static std::string data = "";
+		if (ImGui::IsWindowAppearing()) //only read the clipboard once per opening of this context window
+		 data = ReadFromClipboard();
+		if (is_valid_json(data))
+		{
+			if (ImGui::MenuItem("Paste")) {
+				ParseInfo nparse;
+				nlohmann::json jsonData = nlohmann::json::parse(data);
+				nparse.from_json(jsonData);
+				parses.push_back(nparse);
+				write_vec();
+			}
+		}
+		else
+			ImGui::MenuItem("No valid parse to paste");
+		ImGui::EndPopup();
+	}
 	ImGui::EndChild();
 
 	

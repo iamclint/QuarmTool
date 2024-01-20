@@ -65,20 +65,19 @@ void FolderSelectQuarm()
 
 void SelectLog()
 {
-	static QuarmTool* qt = QuarmTool::GetInst();
-	if (!qt)
-	{
-		qt = QuarmTool::GetInst();
-		return;
-	}
-
 	std::thread f = std::thread([]()
 		{
 			static QuarmTool* qt = QuarmTool::GetInst();
-
+			if (!qt)
+			{
+				qt = QuarmTool::GetInst();
+				return;
+			}
 			// Initialize the COM library
 			CoInitialize(NULL);
 
+			char currentDirectory[MAX_PATH];
+			GetCurrentDirectoryA(MAX_PATH, currentDirectory);
 			// Initialize the OPENFILENAME structure
 			OPENFILENAMEA ofn = { 0 };
 			char szFile[MAX_PATH] = { 0 };
@@ -100,7 +99,7 @@ void SelectLog()
 
 				qt->pLogMonitor->ReadLogFile(szFile);
 			}
-
+			SetCurrentDirectoryA(currentDirectory);
 			// Uninitialize the COM library
 			CoUninitialize();
 		});

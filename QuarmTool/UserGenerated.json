@@ -43,10 +43,10 @@
         "display": "{0} said your name",
         "duration": 4,
         "enabled": true,
-        "event_type": 4,
+        "event_type": 5,
         "match": "Hail",
         "name": "my name",
-        "sound_path": "",
+        "sound_path": "D:\\Sony\\TAKP PC V2.1c\\TAKP PC V2.1\\charm_break.wav",
         "type": 2
     },
     {

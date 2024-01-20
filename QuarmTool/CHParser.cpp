@@ -20,7 +20,6 @@ bool CHParser::parseMessage(const std::string& message, CHCast& ref_cast)
     // Try to match the pattern in the message
     if (std::regex_match(message, matches, pattern))
     {
-        OutputDebugStringA(("Matches: " + std::to_string((int)matches.size())).c_str());
         // Output the matched names
         if (matches.size() == 4)  // Ensure we have four captured groups
         {

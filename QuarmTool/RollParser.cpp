@@ -98,7 +98,7 @@ void RollParser::draw()
             char buffer[80]; // Adjust the buffer size as needed
             std::strftime(buffer, sizeof(buffer), "%H:%M:%S", &localTime);
 
-            ImGui::BeginChild(std::string("rollframe" + std::to_string(i) + "##" + std::to_string(i)).c_str(), { 160, 400 }, true);
+            ImGui::BeginChild(std::string("rollframe" + std::to_string(i) + "##" + std::to_string(i)).c_str(), { 160, 500 }, true);
             ImGui::Text("%i to %i (%s)", vec.front().from, vec.front().to, buffer);
 
             if (ImGui::BeginTable(std::string("roll##" + std::to_string(i)).c_str(), 2, ImGuiTableFlags_BordersInner | ImGuiTableFlags_Resizable))
@@ -115,12 +115,8 @@ void RollParser::draw()
             }
             ImGui::EndChild();
             if (iin % 4 != 0)
-            {
                 ImGui::SameLine();
-                iin++;
-            }
-            else if (vec.size())
-                iin++;
+             iin++;
         }
     }
 
@@ -129,7 +125,7 @@ void RollParser::draw()
         if (vec.size())
         {
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(.3f, .3f, .3f, .5f));
-            ImGui::BeginChild(std::string("rollframe" + std::to_string(vec.front().timestamp) + "##" + std::to_string(vec.front().timestamp)).c_str(), { 160, 400 }, true);
+            ImGui::BeginChild(std::string("rollframe" + std::to_string(vec.front().timestamp) + "##" + std::to_string(vec.front().timestamp)).c_str(), { 160, 300 }, true);
             ImGui::Text("%i to %i (expired)", vec.front().from, vec.front().to);
 
             if (ImGui::BeginTable(std::string("roll##" + std::to_string(vec.front().timestamp)).c_str(), 2, ImGuiTableFlags_BordersInner | ImGuiTableFlags_Resizable))
@@ -146,12 +142,9 @@ void RollParser::draw()
             ImGui::EndChild();
             ImGui::PopStyleColor();
             if (iin % 4 != 0)
-            {
                 ImGui::SameLine();
-                iin++;
-            }
-            else if (vec.size())
-                iin++;
+            iin++;
+
         }
     }
     ImGui::EndChild();

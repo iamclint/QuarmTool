@@ -228,8 +228,7 @@ void LogMonitor::HandleNewLine(const std::string& data, bool visuals)
     iss >> std::get_time(&timestamp, "%a %b %d %H:%M:%S %Y");
 
     if (iss.fail()) {
-        OutputDebugStringA("Failed to parse timestamp");
-        std::cerr << "Failed to parse timestamp" << std::endl;
+        std::cout << "Failed to parse timestamp" << std::endl;
     }
 
     // Convert the parsed timestamp to a time_t
