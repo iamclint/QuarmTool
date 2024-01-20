@@ -255,8 +255,11 @@ void LogMonitor::HandleFileChange(std::string filename)
     static QuarmTool* qt = QuarmTool::GetInst();
     if (filename.find("eqlog_") == 0 && filename.rfind("_pq.proj.txt") == (filename.length() - strlen("_pq.proj.txt")))
     { 
-        active_log = filename;
-        qt->pSettings->update("last_log", active_log);
+        if (filename != active_log) {
+            active_log = filename;
+
+            qt->pSettings->update("last_log", active_log);
+        }
         //a project quarm log file has been modified
         std::ifstream file(qt->pSettings->game_path + "\\" + filename, std::ios::in);
 

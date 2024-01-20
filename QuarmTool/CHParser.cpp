@@ -91,8 +91,18 @@ std::string DurationStr(std::chrono::time_point<std::chrono::steady_clock> end_t
 
 void CHParser::draw_ui()
 {
+    static QuarmTool* qt = QuarmTool::GetInst();
+    if (!qt)
+    {
+        qt = QuarmTool::GetInst();
+        return;
+    }
     auto currentTime = std::chrono::steady_clock::now();
     ImGui::BeginChild(std::string("CHUI").c_str());
+    if (ImGui::Checkbox("Draw ch overlay", &qt->pSettings->show_ch_overlay))
+        qt->pSettings->update<bool>("ch_overlay", qt->pSettings->show_ch_overlay);
+
+
     for (int i = 0; auto & [heal_to, casters] : active_heals)
     {
         if (casters.size())
@@ -142,6 +152,8 @@ void CHParser::draw()
         qt = QuarmTool::GetInst();
         return;
     }
+    if (!qt->pSettings->show_ch_overlay)
+        return;
     if (qt->pGameWindow && qt->pGameWindow->Handle)
     {
         auto currentTime = std::chrono::system_clock::now();

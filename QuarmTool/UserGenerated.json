@@ -32,7 +32,7 @@
     {
         "display": "Sow ({1})",
         "duration": 2100,
-        "enabled": true,
+        "enabled": false,
         "event_type": 4,
         "match": "(\\w+) (is surrounded by a brief lupine aura.)",
         "name": "sow",
@@ -40,12 +40,22 @@
         "type": 1
     },
     {
-        "display": "{0} hailed you",
+        "display": "{0} said your name",
         "duration": 4,
         "enabled": true,
         "event_type": 4,
         "match": "Hail",
-        "name": "hail",
+        "name": "my name",
+        "sound_path": "",
+        "type": 2
+    },
+    {
+        "display": "Damage shield",
+        "duration": 3,
+        "enabled": true,
+        "event_type": 2,
+        "match": "was burned.",
+        "name": "burn",
         "sound_path": "",
         "type": 2
     }

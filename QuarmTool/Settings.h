@@ -11,7 +11,7 @@ public:
 	std::string game_path="";
 	std::string last_log_file = "";
 	bool auto_sort_logs = false;
-
+	bool show_ch_overlay = true;
 
 	template<typename X>
 	void update(const char* key, X& value)

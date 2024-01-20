@@ -61,8 +61,11 @@ void NotificationManager::draw()
                         ImGui::SetWindowFontScale(1.2);
                         if (ImGui::IsWindowAppearing())
                             SetFocus(qt->pGameWindow->Handle);
+                        if (n.count > 1)
+                            ImGui::Text("(%i) %s", n.count, n.message.c_str());
+                        else
+                            ImGui::Text("%s", n.message.c_str());
 
-                        ImGui::Text("(%i) %s", n.count, n.message.c_str());
                         index++;
                     }
                     next_window_top = ImGui::GetWindowPos().y + ImGui::GetWindowSize().y + 5;

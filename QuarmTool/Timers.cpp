@@ -2,6 +2,7 @@
 #include "QuarmTool.h"
 #include "ImGui/imgui.h"
 #include "ImGuiWidgets.h"
+#include <chrono>
 void TimerManager::add(std::string& message, DWORD duration_ms)
 {
     for (auto& t : timers)
@@ -14,6 +15,21 @@ void TimerManager::add(std::string& message, DWORD duration_ms)
     }
     timers.push_back({ message, duration_ms });
 }
+
+std::string DurationStr(int milliseconds)
+{
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>((std::chrono::milliseconds)(milliseconds));
+
+    // Extract seconds and milliseconds from the duration
+    auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration);
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration-minutes);
+    // Format the result as seconds.milliseconds
+    std::ostringstream result;
+    result << minutes.count() << "m " << seconds.count() << "s";
+    return result.str();
+}
+
+
 void TimerManager::draw_ui()
 {
     static QuarmTool* qt = QuarmTool::GetInst();
@@ -36,7 +52,8 @@ void TimerManager::draw_ui()
 
                 if (ImGui::Button("Delete"))
                 {
-                    qt->pConfirmation->confirm("Confirm Deletion", "Are you sure you wish to delete timer: " + timers[selected_index].message, [this](bool t)
+                    timers.erase(timers.begin() + selected_index);
+                    /*qt->pConfirmation->confirm("Confirm Deletion", "Are you sure you wish to delete timer: " + timers[selected_index].message, [this](bool t)
                         {
                             if (t)
                             {
@@ -47,7 +64,7 @@ void TimerManager::draw_ui()
                                 OutputDebugStringA("don't delete");
                             }
                             selected_index = -1;
-                        });
+                        });*/
                 }
 
                 if (selected_index == -1)
@@ -58,7 +75,6 @@ void TimerManager::draw_ui()
             {
                 for (int index = 0; auto & n : timers)
                 {
-
                     float diff = n.end_time - GetTickCount64();
                     float perc = (diff / (float)(n.duration * 1000));
                     if (ImGui::IsWindowHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -68,10 +84,19 @@ void TimerManager::draw_ui()
                     {
                         selected_index = index;
                     }
+                    if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Right))
+                    {
+                        selected_index = index;
+                        timers.erase(timers.begin() + selected_index);
+                    }
                     ImGui::SameLine(-1);
-                    ImGui::Text("(%i) %s", n.count, n.message.c_str());
+                    if (n.count > 1)
+                        ImGui::Text("(%i) %s", n.count, n.message.c_str());
+                    else
+                        ImGui::Text("%s", n.message.c_str());
+                    
                     ImGui::TableNextColumn();
-                    ImGui::EqProgressBar(("timerprogress" + std::to_string(index)).c_str(), perc, { 150,8 }, "", ImGui::GenerateColorFromStr(n.message));
+                    ImGui::EqProgressBar(("timerprogress" + std::to_string(index)).c_str(), perc, { 150,8 }, DurationStr((int)diff).c_str(), ImGui::GenerateColorFromStr(n.message));
                     index++;
                 }
                 ImGui::EndTable();
@@ -131,7 +156,7 @@ void TimerManager::draw()
 
                         ImGui::Text("%s", n.message.c_str());
                         ImGui::SameLine();
-                        ImGui::EqProgressBar(("timerprogress" + std::to_string(index)).c_str(), perc, { 150,8 }, "", ImGui::GenerateColorFromStr(n.message));
+                        ImGui::EqProgressBar(("timerprogress" + std::to_string(index)).c_str(), perc, { 150,8 }, DurationStr((int)diff).c_str(), ImGui::GenerateColorFromStr(n.message));
                         index++;
                     }
                     next_window_top = ImGui::GetWindowPos().y + ImGui::GetWindowSize().y + 3;

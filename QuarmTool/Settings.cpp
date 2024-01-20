@@ -6,6 +6,7 @@ Settings::Settings()
 	game_path = read<std::string>("game_path");
 	auto_sort_logs = read<bool>("auto_sort");
 	last_log_file = read<std::string>("last_log");
+	show_ch_overlay = read<bool>("ch_overlay");
 	
  //   ui->Entities->is_open = zeal->settings->read<bool>("Entities_Window");
 }

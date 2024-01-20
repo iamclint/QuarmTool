@@ -6,10 +6,24 @@
 #include "ImGui/imgui_stdlib.h"
 #include "QuarmTool.h"
 #include <regex>
+#pragma comment(lib, "Winmm.lib")
+std::vector<std::string> splitString(const std::string& input) {
+	std::vector<std::string> result;
+	std::istringstream iss(input);
+	std::string token;
+
+	while (iss >> token) {
+		result.push_back(token);
+	}
+
+	return result;
+}
+
+
 UserGeneratedParser::UserGeneratedParser()
 {
 	std::ifstream fileIn("UserGenerated.json");
-
+	active_parse = nullptr;
 	if (!fileIn.is_open()) {
 		return;
 	}
@@ -52,6 +66,48 @@ nlohmann::json UserGeneratedParser::get_vec()
 	fileIn.close();
 	return jsonData;
 }
+
+std::vector<std::string> get_parse_matches(ParseInfo& parse, std::string& data, std::string& display_data)
+{
+	std::vector<std::string> rvec;
+	if (parse.match_type == MatchType_::MatchType_regex)
+	{
+		std::regex pattern(parse.pattern, std::regex_constants::icase);
+		std::smatch match;
+		if (std::regex_match(data, match, pattern)) 
+		{
+			for (auto& m : match)
+			{
+				rvec.push_back(m.str());
+			}
+		}
+	}
+	else if (parse.match_type == MatchType_::MatchType_string)
+	{
+		if (data.find(parse.pattern) != std::string::npos)
+		{
+			rvec = splitString(data);
+		}
+	}
+
+	for (size_t i = 0; i < rvec.size(); ++i)
+	{
+		// Construct the placeholder string, e.g., "{1}"
+		std::string placeholder = "{" + std::to_string(i) + "}";
+
+		// Find the position of the placeholder in the original string
+		size_t pos = display_data.find(placeholder);
+
+		// Replace the placeholder with the corresponding string from the vector
+		while (pos != std::string::npos) {
+			display_data.replace(pos, placeholder.length(), rvec[i]);
+			pos = display_data.find(placeholder);
+		}
+	}
+
+	return rvec;
+}
+
 
 
 void SelectSound()
@@ -103,18 +159,6 @@ UserGeneratedParser::~UserGeneratedParser()
 
 }
 
-std::vector<std::string> splitString(const std::string& input) {
-	std::vector<std::string> result;
-	std::istringstream iss(input);
-	std::string token;
-
-	while (iss >> token) {
-		result.push_back(token);
-	}
-
-	return result;
-}
-
 
 void UserGeneratedParser::parse_data(std::time_t timestamp, std::string data)
 {
@@ -128,73 +172,39 @@ void UserGeneratedParser::parse_data(std::time_t timestamp, std::string data)
 	{
 		try
 		{
-			if (p.match_type == MatchType_::MatchType_regex)
+			if (!p.enabled)
+				continue;
+			std::string tmp_str = p.display;
+			std::vector<std::string> matches = get_parse_matches(p, data, tmp_str);
+			if (matches.size() > 0)
 			{
-				std::regex pattern(p.pattern, std::regex_constants::icase);
-				// Use std::smatch to store the matched groups
-				std::smatch match;
-				// Attempt to match the regular expression
-				if (std::regex_match(data, match, pattern)) {
-					// Iterate through the vector and replace occurrences of "{1}", "{2}", etc.
-					std::string tmp_str = p.display;
-					for (size_t i = 0; i < match.size(); ++i)
-					{
-						// Construct the placeholder string, e.g., "{1}"
-						std::string placeholder = "{" + std::to_string(i) + "}";
-
-						// Find the position of the placeholder in the original string
-						size_t pos = tmp_str.find(placeholder);
-
-						// Replace the placeholder with the corresponding string from the vector
-						while (pos != std::string::npos) {
-							tmp_str.replace(pos, placeholder.length(), match[i]);
-							pos = tmp_str.find(placeholder);
-						}
-					}
-					if (p.event_type & MatchEvent_NotifyWindow)
-					{
-						std::scoped_lock notifies(qt->pNotify->_lock);
-						qt->pNotify->add(tmp_str, 3);
-					}
-					if (p.event_type & MatchEvent_TimerBar)
-					{
-						std::scoped_lock timers(qt->pTimer->_lock);
-						qt->pTimer->add(tmp_str, p.duration);
-
-					}
-				}
-			}
-			else if (p.match_type == MatchType_::MatchType_string)
-			{
-				if (data.find(p.pattern) != std::string::npos)
+				if (p.event_type & MatchEvent_Playsound)
 				{
-					std::vector<std::string> sp_data = splitString(data);
-					std::string tmp_str = p.display;
-					for (size_t i = 0; i < sp_data.size(); ++i)
+					if (!p.sound_path.length())
+						break;
+					std::stringstream ss;
+					
+					if (p.sound_path.substr(p.sound_path.length() - 3, 3) == "wav")
 					{
-						// Construct the placeholder string, e.g., "{1}"
-						std::string placeholder = "{" + std::to_string(i) + "}";
-
-						// Find the position of the placeholder in the original string
-						size_t pos = tmp_str.find(placeholder);
-
-						// Replace the placeholder with the corresponding string from the vector
-						while (pos != std::string::npos) {
-							tmp_str.replace(pos, placeholder.length(), sp_data[i]);
-							pos = tmp_str.find(placeholder);
-						}
+						ss << "open \"" << p.sound_path << "\" type waveaudio alias mp3";
 					}
-					if (p.event_type & MatchEvent_NotifyWindow)
+					else
 					{
-						std::scoped_lock notifies(qt->pNotify->_lock);
-						qt->pNotify->add(tmp_str, 3);
+						ss << "open \"" << p.sound_path << "\" type mpegvideo alias mp3";
 					}
-					if (p.event_type & MatchEvent_TimerBar)
-					{
-						std::scoped_lock timers(qt->pTimer->_lock);
-						qt->pTimer->add(tmp_str, p.duration);
+					mciSendStringA(ss.str().c_str(), NULL, 0, NULL);
+					mciSendStringA("play mp3", NULL, 0, NULL);
+				}
+				if (p.event_type & MatchEvent_NotifyWindow)
+				{
+					std::scoped_lock notifies(qt->pNotify->_lock);
+					qt->pNotify->add(tmp_str, 3);
+				}
+				if (p.event_type & MatchEvent_TimerBar)
+				{
+					std::scoped_lock timers(qt->pTimer->_lock);
+					qt->pTimer->add(tmp_str, p.duration);
 
-					}
 				}
 			}
 		}
@@ -296,61 +306,11 @@ void UserGeneratedParser::draw_ui()
 				try
 				{
 					std::string tmp_str = active_parse->display;
-					if (active_parse->match_type == MatchType_::MatchType_regex)
+					std::vector<std::string> matches = get_parse_matches(*active_parse, active_parse->test_data, tmp_str);
+					for (int index = 0 ; auto& m : matches)
 					{
-						std::regex pattern(active_parse->pattern, std::regex_constants::icase);
-						// Use std::smatch to store the matched groups
-						std::smatch match;
-						// Attempt to match the regular expression
-						if (std::regex_match(active_parse->test_data, match, pattern)) {
-							for (int match_index = 0; auto & m : match)
-							{
-								ImGui::Text("{%i} %s", match_index, m.str().c_str());
-								match_index++;
-							}
-
-							for (size_t i = 0; i < match.size(); ++i)
-							{
-								// Construct the placeholder string, e.g., "{1}"
-								std::string placeholder = "{" + std::to_string(i) + "}";
-
-								// Find the position of the placeholder in the original string
-								size_t pos = tmp_str.find(placeholder);
-
-								// Replace the placeholder with the corresponding string from the vector
-								while (pos != std::string::npos) {
-									tmp_str.replace(pos, placeholder.length(), match[i]);
-									pos = tmp_str.find(placeholder);
-								}
-							}
-						}
-					}
-					else if (active_parse->match_type == MatchType_::MatchType_string)
-					{
-						if (active_parse->test_data.find(active_parse->pattern) != std::string::npos)
-						{
-							std::vector<std::string> sp_data = splitString(active_parse->test_data);
-							for (int match_index=0; auto& e : sp_data)
-							{
-								ImGui::Text("{%i} %s", match_index, e.c_str());
-								match_index++;
-							}
-
-							for (size_t i = 0; i < sp_data.size(); ++i)
-							{
-								// Construct the placeholder string, e.g., "{1}"
-								std::string placeholder = "{" + std::to_string(i) + "}";
-
-								// Find the position of the placeholder in the original string
-								size_t pos = tmp_str.find(placeholder);
-
-								// Replace the placeholder with the corresponding string from the vector
-								while (pos != std::string::npos) {
-									tmp_str.replace(pos, placeholder.length(), sp_data[i]);
-									pos = tmp_str.find(placeholder);
-								}
-							}
-						}
+						ImGui::Text("{%i} %s", index, m.c_str());
+						index++;
 					}
 					ImGui::Text("Display: %s", tmp_str.c_str());
 
@@ -406,8 +366,9 @@ void UserGeneratedParser::draw_ui()
 	}
 
 
-	if (ImGui::BeginTable("Parses", 6, ImGuiTableFlags_Resizable))
+	if (ImGui::BeginTable("Parses", 7, ImGuiTableFlags_Resizable))
 	{
+		ImGui::TableSetupColumn("enabled");
 		ImGui::TableSetupColumn("name");
 		ImGui::TableSetupColumn("match");
 		ImGui::TableSetupColumn("events");
@@ -417,6 +378,9 @@ void UserGeneratedParser::draw_ui()
 		ImGui::TableHeadersRow();
 		for (int index = 0; auto & e : parses)
 		{
+			ImGui::TableNextColumn();
+			if (ImGui::Checkbox(("##" + e.name).c_str(), &e.enabled))
+				write_vec();
 			ImGui::TableNextColumn();
 			if (ImGui::Selectable(("##" + std::to_string(index) + e.name).c_str(), selected == index, ImGuiSelectableFlags_SpanAllColumns))
 				selected = index;
