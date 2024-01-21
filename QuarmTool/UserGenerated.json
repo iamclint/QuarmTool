@@ -46,7 +46,7 @@
         "event_type": 5,
         "match": "Hail",
         "name": "my name",
-        "sound_path": "D:\\Sony\\TAKP PC V2.1c\\TAKP PC V2.1\\charm_break.wav",
+        "sound_path": "D:\\charm_break.wav",
         "type": 2
     },
     {
