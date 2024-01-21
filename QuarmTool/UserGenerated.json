@@ -42,7 +42,7 @@
     {
         "display": "{0} said your name",
         "duration": 4,
-        "enabled": true,
+        "enabled": false,
         "event_type": 5,
         "match": "Hail",
         "name": "my name",
@@ -58,5 +58,15 @@
         "name": "burn",
         "sound_path": "",
         "type": 2
+    },
+    {
+        "display": "feedback ({1})",
+        "duration": 180,
+        "enabled": true,
+        "event_type": 4,
+        "match": "([\\w\\s]+) is enveloped in blazing energy.",
+        "name": "feedback",
+        "sound_path": "",
+        "type": 1
     }
 ]

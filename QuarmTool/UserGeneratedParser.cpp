@@ -144,14 +144,21 @@ std::vector<std::string> get_parse_matches(ParseInfo& parse, std::string& data, 
 	std::vector<std::string> rvec;
 	if (parse.match_type == MatchType_::MatchType_regex)
 	{
-		std::regex pattern(parse.pattern, std::regex_constants::icase);
-		std::smatch match;
-		if (std::regex_match(data, match, pattern)) 
+		try
 		{
-			for (auto& m : match)
+			std::regex pattern(parse.pattern, std::regex_constants::icase);
+			std::smatch match;
+			if (std::regex_match(data, match, pattern))
 			{
-				rvec.push_back(m.str());
+				for (auto& m : match)
+				{
+					rvec.push_back(m.str());
+				}
 			}
+		}
+		catch (const std::exception& e) {
+			rvec.push_back(e.what());
+			return rvec;
 		}
 	}
 	else if (parse.match_type == MatchType_::MatchType_string)
@@ -376,26 +383,27 @@ void UserGeneratedParser::draw_ui()
 			{
 
 				ImGui::InputTextWithHint("Sample Data", "Frewil looks tranquil.", &active_parse->test_data);
-			
-				try
+				static std::string last_pattern = "";
+				static std::string last_disp = "";
+				static std::string last_sample = "";
+				static std::string last_tmp_disp = "";
+				static std::vector<std::string> last_matches;
+		
+				if (last_pattern != active_parse->pattern || last_disp != active_parse->display || last_sample != active_parse->test_data)
 				{
-					std::string tmp_str = active_parse->display;
-					std::vector<std::string> matches = get_parse_matches(*active_parse, active_parse->test_data, tmp_str);
-					for (int index = 0 ; auto& m : matches)
-					{
-						ImGui::Text("{%i} %s", index, m.c_str());
-						index++;
-					}
-					ImGui::Text("Display: %s", tmp_str.c_str());
+					last_pattern = active_parse->pattern;
+					last_disp = active_parse->display;
+					last_sample = active_parse->test_data;
+					last_tmp_disp = active_parse->display;
 
-
-				} catch(const std::exception& e) {
-					// Catch and handle the exception
-					
-					ImGui::Text("Invalid Regex: %s", e.what());
-					//std::cerr << "Exception caught: " << e.what() << std::endl;
+					last_matches = get_parse_matches(*active_parse, active_parse->test_data, last_tmp_disp);
 				}
-
+				for (int index = 0 ; auto& m : last_matches)
+				{
+					ImGui::Text("{%i} %s", index, m.c_str());
+					index++;
+				}
+				ImGui::Text("Display: %s", last_tmp_disp.c_str());
 			}
 			ImGui::EndChild();
 			ImGui::EndPopup();
