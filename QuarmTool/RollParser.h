@@ -15,7 +15,7 @@ struct roll_data
 	bool expired;
 	roll_data(int f, int t, int r, std::time_t time, std::string p)
 		: from(f), to(t), result(r), timestamp(time), player(p), expired(false) {}
-	roll_data() {};
+	roll_data() : to(0), from(0), result(0), expired(true) {};
 };
 
 class RollParser

@@ -10,7 +10,7 @@ struct notification
     ULONGLONG end_time;
     int count;
     // Default constructor
-    notification() : message(""), end_time(0) {}
+    notification() : message(""), end_time(0), count(1) {}
     void add(DWORD milliseconds)
     {
         end_time = GetTickCount64() + static_cast<ULONGLONG>(milliseconds * 1000);

@@ -12,7 +12,8 @@ public:
 	std::string last_log_file = "";
 	bool auto_sort_logs = false;
 	bool show_ch_overlay = true;
-
+	std::string ch_regex = "";
+	std::string dkp_regex = "";
 	template<typename X>
 	void update(const char* key, X& value)
 	{

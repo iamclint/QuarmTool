@@ -7,7 +7,8 @@ Settings::Settings()
 	auto_sort_logs = read<bool>("auto_sort");
 	last_log_file = read<std::string>("last_log");
 	show_ch_overlay = read<bool>("ch_overlay");
-	
+	ch_regex = read<std::string>("ch_regex");
+	dkp_regex = read<std::string>("dkp_regex");
  //   ui->Entities->is_open = zeal->settings->read<bool>("Entities_Window");
 }
 

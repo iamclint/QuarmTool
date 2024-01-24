@@ -5,12 +5,19 @@
 #include <regex>
 #include <chrono>
 #include "ImGuiWidgets.h"
+#include "ImGui/imgui_stdlib.h"
 
 bool DKPParser::parseMessage(const std::string& message, DKPBid& bid)
 {
-    if (current_regex == "")
-        current_regex = base_regex;
-    std::regex pattern(current_regex, std::regex_constants::icase);
+    static QuarmTool* qt = QuarmTool::GetInst();
+    if (!qt)
+    {
+        qt = QuarmTool::GetInst();
+        return false;
+    }
+   if (qt->pSettings->dkp_regex == "")
+        qt->pSettings->dkp_regex = base_regex;
+    std::regex pattern(qt->pSettings->dkp_regex, std::regex_constants::icase);
     // Use std::smatch to store the matched groups
    std::smatch match;
 
@@ -31,7 +38,17 @@ bool DKPParser::parseMessage(const std::string& message, DKPBid& bid)
 
 void DKPParser::draw()
 {
+    static QuarmTool* qt = QuarmTool::GetInst();
+    if (!qt)
+    {
+        qt = QuarmTool::GetInst();
+        return;
+    }
     ImGui::BeginChild(std::string("DKPUI").c_str());
+    ImGui::InputText("##dkpRegex", &qt->pSettings->dkp_regex);
+    ImGui::SameLine();
+    if (ImGui::Button("Save"))
+        qt->pSettings->update<std::string>("dkp_regex", qt->pSettings->dkp_regex);
     if (wins.size() > 0)
     {
         if (ImGui::BeginTable("DKPTable##nq1do6qqhmNVJs3", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersInner | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable, { 0.f,0.f }, 0.f))
@@ -79,7 +96,14 @@ void DKPParser::parse_data(std::time_t timestamp, std::string data)
 
 DKPParser::DKPParser()
 {
-
+    static QuarmTool* qt = QuarmTool::GetInst();
+    if (!qt)
+    {
+        qt = QuarmTool::GetInst();
+        return;
+    }
+    if (qt->pSettings->dkp_regex == "")
+        qt->pSettings->dkp_regex = base_regex;
 }
 
 DKPParser::~DKPParser()

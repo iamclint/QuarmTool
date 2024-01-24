@@ -6,13 +6,22 @@
 #include <regex>
 #include <chrono>
 #include "ImGuiWidgets.h"
+#include "ImGui/imgui_stdlib.h"
 
 
 bool CHParser::parseMessage(const std::string& message, CHCast& ref_cast)
 {
-    if (current_regex == "")
-        current_regex = base_regex;
-    std::regex pattern(current_regex, std::regex_constants::icase);
+    static QuarmTool* qt = QuarmTool::GetInst();
+    if (!qt)
+    {
+        qt = QuarmTool::GetInst();
+        return false;
+    }
+    if (qt->pSettings->ch_regex == "")
+    {
+        qt->pSettings->ch_regex = base_regex;
+    }
+    std::regex pattern(qt->pSettings->ch_regex, std::regex_constants::icase);
     //std::regex pattern(R"((\w+) (say(?:s)?,|tells the raid(?:s)?,|shouts(?:,)?|tells the guild(?:s)?,|says out of character(?:s)?,) '(\w+)\s+CH\s+.*?\s*(\w+)'\s*)");
     // Use std::smatch to store the matched groups
     std::smatch matches;
@@ -98,6 +107,10 @@ void CHParser::draw_ui()
     }
     auto currentTime = std::chrono::steady_clock::now();
     ImGui::BeginChild(std::string("CHUI").c_str());
+    ImGui::InputText("##regex", &qt->pSettings->ch_regex);
+    ImGui::SameLine();
+    if (ImGui::Button("Save"))
+        qt->pSettings->update<std::string>("ch_regex", qt->pSettings->ch_regex);
     if (ImGui::Checkbox("Draw ch overlay", &qt->pSettings->show_ch_overlay))
         qt->pSettings->update<bool>("ch_overlay", qt->pSettings->show_ch_overlay);
 
@@ -108,7 +121,7 @@ void CHParser::draw_ui()
         {
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(.1f, .1f, .1f, 1.f));
             ImGui::BeginChild((heal_to + "chui").c_str(), { 200, 300 }, true);
-            ImGui::Text("Heals to %s", heal_to.c_str());
+            ImGui::Text("Heals to %s (%i)", heal_to.c_str(), casters.size());
             if (ImGui::BeginTable((heal_to + "heallist").c_str(), 2, ImGuiTableFlags_SizingFixedFit))
             {
                 for (auto& c : casters) {
@@ -136,11 +149,19 @@ void CHParser::draw_ui()
                 }
                 ImGui::EndTable();
             }
+            casters.erase(std::remove_if(casters.begin(), casters.end(), [](CHCast c) {
+                auto currentTime = std::chrono::system_clock::now();
+                auto currentTime_t = std::chrono::system_clock::to_time_t(currentTime);
+                auto timeDifference = currentTime_t - c.casting_timestamp;
+                return timeDifference > 10;
+                }
+            ), casters.end());
             ImGui::EndChild();
             ImGui::PopStyleColor();
         }
     }
     ImGui::EndChild();
+
 }
 
 void CHParser::draw()
@@ -232,6 +253,18 @@ void CHParser::draw()
                             ImGui::GetWindowDrawList()->AddText(WindowTranslate({ cast.current_pos + (next.current_pos - cast.current_pos + w) / 2 - (text_size.x / 2), (heal_height / 2) - text_size.y - 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f), dur.c_str());
                             ImGui::GetWindowDrawList()->AddLine(WindowTranslate({ cast.current_pos + w, heal_height / 2 }), WindowTranslate({ next.current_pos, heal_height / 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f));
                         }
+                        else
+                        {
+                            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - cast.startTime);
+                            if (duration.count() <= (int)cast.cast_time)
+                            {
+                                std::string dur = DurationStr(currentTime, cast.startTime);
+                                ImVec2 text_size = ImGui::CalcTextSize(dur.c_str());
+                                ImGui::GetWindowDrawList()->AddText(WindowTranslate({ cast.current_pos + (ImGui::GetWindowWidth() - (cast.current_pos + w)) / 2 - (text_size.x / 2), (heal_height / 2) - text_size.y - 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f), dur.c_str());
+                                ImGui::GetWindowDrawList()->AddLine(WindowTranslate({ cast.current_pos + w, heal_height / 2 }), WindowTranslate({ ImGui::GetWindowWidth(), heal_height / 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f));
+                            }
+                        }
+
                     }
                     ImGui::SetCursorPosX(0);
                     ImGui::Button(heal_to.c_str(), {0, heal_height});
@@ -258,6 +291,14 @@ void CHParser::draw()
 
 CHParser::CHParser()
 {
+    static QuarmTool* qt = QuarmTool::GetInst();
+    if (!qt)
+    {
+        qt = QuarmTool::GetInst();
+        return;
+    }
+    if (qt->pSettings->ch_regex == "")
+        qt->pSettings->ch_regex = base_regex;
 }
 
 

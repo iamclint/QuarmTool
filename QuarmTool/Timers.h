@@ -16,7 +16,7 @@ struct timer
         count++;
     }
     // Default constructor
-    timer() : message(""), end_time(0) {}
+    timer() : message(""), end_time(0), count(1), duration(1000) {}
 
     // Parameterized constructor with message and milliseconds duration
     timer(const std::string& msg, DWORD milliseconds) : message(msg)

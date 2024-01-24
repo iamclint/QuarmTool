@@ -28,7 +28,6 @@ struct CHCast
 class CHParser
 {
 public:
-	std::string current_regex = "";
 	void parse_data(std::time_t timestamp, std::string data);
 	void draw();
 	void draw_ui();
@@ -36,7 +35,7 @@ public:
 	CHParser();
 	~CHParser();
 private:
-	const std::string base_regex = R"((\w+) \b[^']*'(\w+) ch [\W\w]? ?(\w+)')";
+	const std::string base_regex = R"((\w+) \b[^']*'(\w+) ch [\W]? ?(\w+)')";
 	//const std::string base_regex = R"((\w+) (say(?:s)?,|tell(?:s)? the raid,|shout(?:s)?,|tell(?:s)? the guild,|say(?:s)? out of character,) '(\w+) CH .*?\s*(\w+)'\s*)";
 	bool parseMessage(const std::string& message, CHCast& ref_cast);
 };

@@ -68,5 +68,15 @@
         "name": "feedback",
         "sound_path": "",
         "type": 1
+    },
+    {
+        "display": "Damage shield",
+        "duration": 3,
+        "enabled": true,
+        "event_type": 2,
+        "match": "was burned.",
+        "name": "burn",
+        "sound_path": "",
+        "type": 2
     }
 ]
