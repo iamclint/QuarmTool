@@ -21,7 +21,7 @@ struct roll_data
 class RollParser
 {
 public:
-	void parse_data(std::time_t timestamp, std::string data);
+	void parse_data(class LineData& ld);
 	std::unordered_map<int, std::deque<roll_data>> roll_map;
 	std::deque<std::deque<roll_data>> expired_rolls;
 	bool validate_roll(int identifier);

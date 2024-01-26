@@ -151,11 +151,11 @@ void RollParser::draw()
     map_lock.unlock();
 }
 
-void RollParser::parse_data(std::time_t timestamp, std::string data)
+void RollParser::parse_data(LineData& ld)
 {
     auto currentTime = std::chrono::system_clock::now();
     auto currentTime_t = std::chrono::system_clock::to_time_t(currentTime);
-    auto timeDifference = currentTime_t - timestamp;
+    auto timeDifference = currentTime_t - ld.timestamp;
 
     //cleanup expired roll vectors
 
@@ -170,13 +170,13 @@ void RollParser::parse_data(std::time_t timestamp, std::string data)
 
     static std::string roll_start = "**A Magic Die is rolled by ";
     static std::string roll_data_start = "**It could have been any number from ";
-    if (data.compare(0, roll_start.length(), roll_start) == 0) 
+    if (ld.msg.compare(0, roll_start.length(), roll_start) == 0) 
     {
-        current_roller = data.substr(roll_start.length(), data.length() - 1 - roll_start.length());
+        current_roller = ld.msg.substr(roll_start.length(), ld.msg.length() - 1 - roll_start.length());
     }
-    else if (data.compare(0, roll_data_start.length(), roll_data_start) == 0)
+    else if (ld.msg.compare(0, roll_data_start.length(), roll_data_start) == 0)
     {
-        roll_data rd = extract_roll_data(data, current_roller, timestamp);
+        roll_data rd = extract_roll_data(ld.msg, current_roller, ld.timestamp);
         int ident = rd.from+rd.to;
 
         if (validate_roll(ident)) //make sure it wasn't a double roll with the same values

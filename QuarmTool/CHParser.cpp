@@ -9,7 +9,7 @@
 #include "ImGui/imgui_stdlib.h"
 
 
-bool CHParser::parseMessage(const std::string& message, CHCast& ref_cast)
+bool CHParser::parseMessage(LineData& ld, CHCast& ref_cast)
 {
     static QuarmTool* qt = QuarmTool::GetInst();
     if (!qt)
@@ -22,19 +22,20 @@ bool CHParser::parseMessage(const std::string& message, CHCast& ref_cast)
         qt->pSettings->ch_regex = base_regex;
     }
     std::regex pattern(qt->pSettings->ch_regex, std::regex_constants::icase);
-    //std::regex pattern(R"((\w+) (say(?:s)?,|tells the raid(?:s)?,|shouts(?:,)?|tells the guild(?:s)?,|says out of character(?:s)?,) '(\w+)\s+CH\s+.*?\s*(\w+)'\s*)");
     // Use std::smatch to store the matched groups
     std::smatch matches;
 
+
     // Try to match the pattern in the message
-    if (std::regex_match(message, matches, pattern))
+    if (std::regex_search(ld.channel_msg, matches, pattern))
     {
         // Output the matched names
-        if (matches.size() == 4)  // Ensure we have four captured groups
+        if (matches.size() >= 2)  // Ensure we have four captured groups
         {
-            ref_cast.caster = matches[1];
-            ref_cast.identifier = matches[2];
-            ref_cast.target = matches[3];
+           // ref_cast.caster = matches[1];
+            ref_cast.caster = ld.message_sender;
+            ref_cast.identifier = matches[1];
+            ref_cast.target = matches[2];
             ref_cast.cast_time = spell::CompleteHeal;
             return true;
         }
@@ -43,11 +44,16 @@ bool CHParser::parseMessage(const std::string& message, CHCast& ref_cast)
 }
 
 
-void CHParser::parse_data(std::time_t timestamp, std::string data)
+void CHParser::parse_data(LineData& ld)
 {
+    if (!(ld.channel & channels))
+    {
+        return;
+    }
+
     CHCast tmp_cast;
-    tmp_cast.casting_timestamp = timestamp;
-    if (parseMessage(data, tmp_cast))
+    tmp_cast.casting_timestamp = ld.timestamp;
+    if (parseMessage(ld, tmp_cast))
     {
         active_heals[tmp_cast.target].push_back(tmp_cast);
     }
@@ -97,6 +103,8 @@ std::string DurationStr(std::chrono::time_point<std::chrono::steady_clock> end_t
     return result.str();
 }
 
+
+
 void CHParser::draw_ui()
 {
     static QuarmTool* qt = QuarmTool::GetInst();
@@ -107,13 +115,21 @@ void CHParser::draw_ui()
     }
     auto currentTime = std::chrono::steady_clock::now();
     ImGui::BeginChild(std::string("CHUI").c_str());
+    ImGui::BeginChildWidget("ch_regex", { 600.f,90.f }, 1, 0);
+    ImGui::Text("Regex");
     ImGui::InputText("##regex", &qt->pSettings->ch_regex);
     ImGui::SameLine();
     if (ImGui::Button("Save"))
         qt->pSettings->update<std::string>("ch_regex", qt->pSettings->ch_regex);
+    ImGui::Text("The first match of the regex should be the identifier (001) or (aaa) for example.\nThe second match should be who its being casted on.");
+    ImGui::EndChildWidget();
+    ImGui::SameLine();
+    if (ImGui::ChannelSelection(&channels))
+        qt->pSettings->update("ch_channel_flags", channels);
+    ImGui::BeginChildWidget("ch_overlay", { 200.f,60.f }, 1, 0);
     if (ImGui::Checkbox("Draw ch overlay", &qt->pSettings->show_ch_overlay))
         qt->pSettings->update<bool>("ch_overlay", qt->pSettings->show_ch_overlay);
-
+    ImGui::EndChildWidget();
 
     for (int i = 0; auto & [heal_to, casters] : active_heals)
     {
@@ -299,6 +315,8 @@ CHParser::CHParser()
     }
     if (qt->pSettings->ch_regex == "")
         qt->pSettings->ch_regex = base_regex;
+
+    channels = qt->pSettings->read<int>("ch_channel_flags");
 }
 
 

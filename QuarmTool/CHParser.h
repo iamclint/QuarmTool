@@ -28,15 +28,16 @@ struct CHCast
 class CHParser
 {
 public:
-	void parse_data(std::time_t timestamp, std::string data);
+	void parse_data(class LineData& ld);
 	void draw();
 	void draw_ui();
+	int channels;
 	std::unordered_map<std::string, std::vector<CHCast>> active_heals;
 	CHParser();
 	~CHParser();
 private:
-	const std::string base_regex = R"((\w+) \b[^']*'(\w+) ch [\W]? ?(\w+)')";
+	const std::string base_regex = R"((\w+) ch [\W]? ?(\w+))";
 	//const std::string base_regex = R"((\w+) (say(?:s)?,|tell(?:s)? the raid,|shout(?:s)?,|tell(?:s)? the guild,|say(?:s)? out of character,) '(\w+) CH .*?\s*(\w+)'\s*)";
-	bool parseMessage(const std::string& message, CHCast& ref_cast);
+	bool parseMessage(class LineData& ld , CHCast& ref_cast);
 };
 

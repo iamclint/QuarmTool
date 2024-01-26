@@ -3,6 +3,7 @@
 #include <fstream>
 #include <Windows.h>
 #include "ImGui/imgui.h"
+#include "ImGuiWidgets.h"
 #include "ImGui/imgui_stdlib.h"
 #include "QuarmTool.h"
 #include <regex>
@@ -148,7 +149,7 @@ std::vector<std::string> get_parse_matches(ParseInfo& parse, std::string& data, 
 		{
 			std::regex pattern(parse.pattern, std::regex_constants::icase);
 			std::smatch match;
-			if (std::regex_match(data, match, pattern))
+			if (std::regex_search(data, match, pattern))
 			{
 				for (auto& m : match)
 				{
@@ -241,7 +242,7 @@ UserGeneratedParser::~UserGeneratedParser()
 }
 
 
-void UserGeneratedParser::parse_data(std::time_t timestamp, std::string data)
+void UserGeneratedParser::parse_data(LineData& ld)
 {
 	static QuarmTool* qt = QuarmTool::GetInst();
 	if (!qt)
@@ -255,8 +256,10 @@ void UserGeneratedParser::parse_data(std::time_t timestamp, std::string data)
 		{
 			if (!p.enabled)
 				continue;
+			if (!(p.channels & ld.channel))
+				continue;
 			std::string tmp_str = p.display;
-			std::vector<std::string> matches = get_parse_matches(p, data, tmp_str);
+			std::vector<std::string> matches = get_parse_matches(p, ld.msg, tmp_str);
 			if (matches.size() > 0)
 			{
 				if (p.event_type & MatchEvent_Playsound)
@@ -322,9 +325,11 @@ void UserGeneratedParser::draw_ui()
 		ImGui::TableNextColumn();
 		if (ImGui::BeginPopup("AddEditParse", ImGuiWindowFlags_AlwaysAutoResize))
 		{
-			ImGui::BeginChild("DataInput", { 600.f,400.f }, 1, 0);
+			ImGui::BeginChild("DataInput", { 450.f,400.f }, 1, 0);
 			{
 				static const char* types = "None\0Regex\0String";
+				ImGui::BeginChildWidget("NamePattern", { 419.f,100.f }, 1, 0);
+				ImGui::Text("Name and Pattern");
 				ImGui::InputText("name", &active_parse->name);
 				if (ImGui::Combo(types, (int*)&active_parse->match_type, types))
 				{
@@ -336,9 +341,23 @@ void UserGeneratedParser::draw_ui()
 					ImGui::InputTextWithHint("pattern", "(\\w+) (looks tranquil.)", &active_parse->pattern);
 				else
 					ImGui::InputTextWithHint("pattern", "looks tranquil.", &active_parse->pattern);
-				ImGui::CheckboxFlags("sound", (int*)&active_parse->event_type, (int)MatchEvent_Playsound);
-				ImGui::CheckboxFlags("notification", (int*)&active_parse->event_type, (int)MatchEvent_NotifyWindow);
-				ImGui::CheckboxFlags("timer", (int*)&active_parse->event_type, (int)MatchEvent_TimerBar);
+				ImGui::EndChildWidget();
+				ImGui::BeginChildWidget("EventFlag", { 419.f,60.f }, 1, 0);
+				ImGui::Text("Event Type");
+				if (ImGui::BeginTable("Event Selection##uvGtSzOVWsX0Cig", 3, ImGuiTableFlags_SizingFixedFit, { 0.f,0.f }, 0.f))
+				{
+					ImGui::TableNextColumn();
+					ImGui::CheckboxFlags("sound", (int*)&active_parse->event_type, (int)MatchEvent_Playsound);
+					ImGui::TableNextColumn();
+					ImGui::CheckboxFlags("notification", (int*)&active_parse->event_type, (int)MatchEvent_NotifyWindow);
+					ImGui::TableNextColumn();
+					ImGui::CheckboxFlags("timer", (int*)&active_parse->event_type, (int)MatchEvent_TimerBar);
+					ImGui::EndTable();
+				}
+			
+				ImGui::EndChildWidget();
+				ImGui::ChannelSelection((int*)&active_parse->channels);
+
 				if (active_parse->event_type & MatchEvent_Playsound)
 				{
 					ImGui::InputText("Sound File", &active_parse->sound_path);
@@ -346,7 +365,7 @@ void UserGeneratedParser::draw_ui()
 					if (ImGui::Button("..."))
 						SelectSound();
 				}
-
+				ImGui::BeginChildWidget("duration display", { 419.f,90.f }, 1, 0);
 				if (active_parse->event_type & MatchEvent_TimerBar)
 				{
 					ImGui::InputInt("duration in seconds", &active_parse->duration);
@@ -376,13 +395,17 @@ void UserGeneratedParser::draw_ui()
 				{
 					ImGui::CloseCurrentPopup();
 				}
+				ImGui::EndChildWidget();
+				
 			}
 			ImGui::EndChild();
 			ImGui::SameLine();
 			ImGui::BeginChild("TestArea", { 500, 0 });
 			{
-
+				ImGui::BeginChildWidget("RegexTestArea", { 0,60.f }, 1, 0);
+				ImGui::Text("Sample Data");
 				ImGui::InputTextWithHint("Sample Data", "Frewil looks tranquil.", &active_parse->test_data);
+				ImGui::EndChildWidget();
 				static std::string last_pattern = "";
 				static std::string last_disp = "";
 				static std::string last_sample = "";
@@ -398,12 +421,17 @@ void UserGeneratedParser::draw_ui()
 
 					last_matches = get_parse_matches(*active_parse, active_parse->test_data, last_tmp_disp);
 				}
+				ImGui::BeginChildWidget("RegexTestArea_Results", { 0,250.f }, 1, 0);
 				for (int index = 0 ; auto& m : last_matches)
 				{
 					ImGui::Text("{%i} %s", index, m.c_str());
 					index++;
 				}
-				ImGui::Text("Display: %s", last_tmp_disp.c_str());
+				ImGui::EndChildWidget();
+				ImGui::BeginChildWidget("RegexTestArea_Results_disp", { 0,60.f }, 1, 0);
+				ImGui::Text("Display from sample data");
+				ImGui::Text("%s", last_tmp_disp.c_str());
+				ImGui::EndChildWidget();
 			}
 			ImGui::EndChild();
 			ImGui::EndPopup();

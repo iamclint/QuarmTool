@@ -43,9 +43,10 @@ struct DKPBid
 class DKPParser
 {
 public:
-	void parse_data(std::time_t timestamp, std::string data);
+	void parse_data(class LineData& ld);
 	void draw();
 	std::vector<DKPBid> wins;
+    int channels;
 	DKPParser();
 	~DKPParser();
 private:

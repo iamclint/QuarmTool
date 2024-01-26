@@ -1,5 +1,6 @@
 [
     {
+        "channels": 255,
         "display": "clarity ({1})",
         "duration": 1620,
         "enabled": true,
@@ -10,6 +11,7 @@
         "type": 1
     },
     {
+        "channels": 255,
         "display": "{1} fizzled",
         "duration": 5,
         "enabled": true,
@@ -20,16 +22,18 @@
         "type": 1
     },
     {
-        "display": "Scribing {2}",
+        "channels": 128,
+        "display": "Scribing {1}",
         "duration": 15,
         "enabled": true,
         "event_type": 4,
-        "match": "(beginning to scribe )([\\w\\W]+)",
+        "match": "beginning to scribe ([\\w\\W]+)",
         "name": "scribe",
         "sound_path": "",
         "type": 1
     },
     {
+        "channels": 255,
         "display": "Sow ({1})",
         "duration": 2100,
         "enabled": false,
@@ -40,6 +44,7 @@
         "type": 1
     },
     {
+        "channels": 255,
         "display": "{0} said your name",
         "duration": 4,
         "enabled": false,
@@ -50,6 +55,7 @@
         "type": 2
     },
     {
+        "channels": 255,
         "display": "Damage shield",
         "duration": 3,
         "enabled": true,
@@ -60,6 +66,7 @@
         "type": 2
     },
     {
+        "channels": 255,
         "display": "feedback ({1})",
         "duration": 180,
         "enabled": true,
@@ -70,6 +77,7 @@
         "type": 1
     },
     {
+        "channels": 255,
         "display": "Damage shield",
         "duration": 3,
         "enabled": true,

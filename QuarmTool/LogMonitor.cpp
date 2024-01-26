@@ -3,6 +3,8 @@
 #include <iostream>
 #include <Windows.h>
 #include <limits>
+#include <regex>
+#include "ImGui/imgui.h"
 namespace fs = std::filesystem;
 
 LogMonitor::LogMonitor()
@@ -13,6 +15,90 @@ LogMonitor::LogMonitor()
     dkp = std::shared_ptr<DKPParser>(new DKPParser);
     user = std::shared_ptr<UserGeneratedParser>(new UserGeneratedParser);
     UpdateFolder();
+}
+
+
+void LineData::ParseChannelData()
+{
+    try
+    {
+        std::regex pattern(R"(\] (\w+)(.*?),)", std::regex_constants::icase);
+        // Use std::smatch to store the matched groups
+        std::string channel_str = "";
+        std::smatch match;
+        if (std::regex_search(full_msg, match, pattern)) {
+            // Access captured groups using match
+            if (match.size() >= 2)
+            {
+                message_sender = match[1];
+                channel_str = match[2];
+            }
+        }
+        if (channel_str != "")
+        {
+            if (channel_str.find("guild") != std::string::npos)
+                channel = channel_::channel_guild;
+            else if (channel_str.find("raid") != std::string::npos)
+                channel = channel_::channel_raid;
+            else if (channel_str.find("character") != std::string::npos) //ooc
+                channel = channel_::channel_ooc;
+            else if (channel_str.find("auctions") != std::string::npos)
+                channel = channel_::channel_auction;
+            else if (channel_str.find("shouts") != std::string::npos)
+                channel = channel_::channel_auction;
+            else if (channel_str.find("tells you") != std::string::npos)
+                channel = channel_::channel_tell;
+            else if (channel_str.find("say") != std::string::npos)
+                channel = channel_::channel_say;
+            else
+                channel = channel_::channel_emote;
+        }
+        if (channel == channel_::channel_emote)
+        {
+            std::regex pattern(R"(\] (\w+))", std::regex_constants::icase);
+            std::string channel_str = "";
+            std::smatch match;
+            if (std::regex_search(full_msg, match, pattern) && match.size() > 0)
+                message_sender = match[1];
+        }
+        else
+        {
+            std::regex pattern("'(.*)'", std::regex_constants::icase);
+            std::string channel_str = "";
+            std::smatch match;
+            if (std::regex_search(full_msg, match, pattern) && match.size() > 0)
+                channel_msg = match[1];
+        }
+    }
+    catch (const std::exception& e) {
+        std::cout << "Exception caught: " << e.what() << std::endl;
+    }
+
+}
+
+void LineData::ParseTimestamp()
+{
+    msg = full_msg.substr(27, full_msg.length() - 27);
+    std::string timestampStr = full_msg.substr(1, 24);
+    // Creating an input string stream for parsing
+    std::istringstream iss(timestampStr);
+    // Formatting to match the timestamp format
+    std::tm tmp = {};
+    iss >> std::get_time(&tmp, "%a %b %d %H:%M:%S %Y");
+
+    if (iss.fail()) {
+        std::cout << "Failed to parse timestamp" << std::endl;
+    }
+    // Convert the parsed timestamp to a time_t
+    timestamp = std::mktime(&tmp);
+}
+
+LineData::LineData(const std::string& data)
+{
+    channel = channel_::channel_none;
+    full_msg = data;
+    ParseTimestamp();
+    ParseChannelData();
 }
 
 bool areSameDay(time_t time1, time_t time2) {
@@ -218,31 +304,14 @@ void LogMonitor::HandleNewLine(const std::string& data, bool visuals)
     if (data.length() < 27)
         return;
 
-    std::string timestampStr = data.substr(1, 24); 
+    LineData ld(data);
 
-    // Creating an input string stream for parsing
-    std::istringstream iss(timestampStr);
-
-    // Formatting to match the timestamp format
-    std::tm timestamp = {};
-    iss >> std::get_time(&timestamp, "%a %b %d %H:%M:%S %Y");
-
-    if (iss.fail()) {
-        std::cout << "Failed to parse timestamp" << std::endl;
-    }
-
-    // Convert the parsed timestamp to a time_t
-    std::time_t timestamp_t = std::mktime(&timestamp);
-
-
-    std::string removed_stamp_data = data.substr(27, data.length() - 27);
-
-    rolls->parse_data(timestamp_t, removed_stamp_data);
-    dkp->parse_data(timestamp_t, removed_stamp_data);
+    rolls->parse_data(ld);
+    dkp->parse_data(ld);
     if (visuals)
     {
-        user->parse_data(timestamp_t, removed_stamp_data);
-        ch->parse_data(timestamp_t, removed_stamp_data);
+        user->parse_data(ld);
+        ch->parse_data(ld);
     }
     
 
@@ -434,3 +503,4 @@ LogMonitor::~LogMonitor()
     if (FolderHandle)
         CloseHandle(FolderHandle);
 }
+

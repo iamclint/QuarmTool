@@ -17,13 +17,14 @@ bool DKPParser::parseMessage(const std::string& message, DKPBid& bid)
     }
    if (qt->pSettings->dkp_regex == "")
         qt->pSettings->dkp_regex = base_regex;
+
     std::regex pattern(qt->pSettings->dkp_regex, std::regex_constants::icase);
     // Use std::smatch to store the matched groups
    std::smatch match;
 
 
     // Attempt to match the regular expression
-    if (std::regex_match(message, match, pattern)) {
+    if (std::regex_search(message, match, pattern)) {
         // Access captured groups using match
         if (match.size() >= 5)
         {
@@ -45,10 +46,19 @@ void DKPParser::draw()
         return;
     }
     ImGui::BeginChild(std::string("DKPUI").c_str());
-    ImGui::InputText("##dkpRegex", &qt->pSettings->dkp_regex);
+
+    ImGui::BeginChildWidget("dkp_regex", { 600.f,90.f }, 1, 0);
+    ImGui::Text("Regex");
+    ImGui::InputText("##dkpregex", &qt->pSettings->dkp_regex);
     ImGui::SameLine();
     if (ImGui::Button("Save"))
         qt->pSettings->update<std::string>("dkp_regex", qt->pSettings->dkp_regex);
+    ImGui::Text("The matches should be item, player, dkp, comments");
+    ImGui::EndChildWidget();
+    ImGui::SameLine();
+    if (ImGui::ChannelSelection(&channels))
+        qt->pSettings->update("dkp_channel_flags", channels);
+
     if (wins.size() > 0)
     {
         if (ImGui::BeginTable("DKPTable##nq1do6qqhmNVJs3", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersInner | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable, { 0.f,0.f }, 0.f))
@@ -84,13 +94,16 @@ void DKPParser::draw()
 }
 
 
-void DKPParser::parse_data(std::time_t timestamp, std::string data)
+void DKPParser::parse_data(LineData& ld)
 {
-    DKPBid bid;
-    bid.timestamp = timestamp;
-    if (parseMessage(data, bid))
+    if (ld.channel & channel_guild || ld.channel & channel_raid)
     {
-        wins.push_back(bid);
+        DKPBid bid;
+        bid.timestamp = ld.timestamp;
+        if (parseMessage(ld.channel_msg, bid))
+        {
+            wins.push_back(bid);
+        }
     }
 }
 
@@ -104,6 +117,7 @@ DKPParser::DKPParser()
     }
     if (qt->pSettings->dkp_regex == "")
         qt->pSettings->dkp_regex = base_regex;
+    channels = qt->pSettings->read<int>("dkp_channel_flags");
 }
 
 DKPParser::~DKPParser()

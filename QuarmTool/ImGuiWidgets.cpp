@@ -4,8 +4,60 @@
 #include "ImGuiWidgets.h"
 #include "ImGui/imgui.h"
 #include "imgui/imgui_internal.h"
+#include "LogMonitor.h"
 namespace ImGui
 {
+	bool BeginChildWidget(const char* name, ImVec2 size, bool border, ImGuiWindowFlags flags)
+	{
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0560342, 0.0560342, 0.0560342, 0.886275));// ImVec4(0.0560342, 0.0689457, 0.119469, 0.886275));
+		return (ImGui::BeginChild(name, size, border, flags));
+	}
+	void EndChildWidget()
+	{
+		ImGui::EndChild();
+		ImGui::PopStyleColor();
+	}
+	bool ChannelSelection(int* flag)
+	{
+
+		bool rval = false;
+		ImGui::BeginChildWidget("child window##8Rk6X6EnzoHjnft", { 419.f,105.f }, 1, 0);
+		ImGui::Text("Select chat channels");
+		if (ImGui::BeginTable("Channel Selection##uvGtSzOVWsX0Cig", 4, 0, { 0.f,0.f }, 0.f))
+		{
+			ImGui::TableNextColumn();
+			if (ImGui::CheckboxFlags("Auction", flag, channel_auction))
+				rval = true;
+			ImGui::TableNextColumn();
+			if (ImGui::CheckboxFlags("Tell", flag, channel_tell))
+				rval = true;
+			ImGui::TableNextColumn();
+			if (ImGui::CheckboxFlags("Raid", flag, channel_raid))
+				rval = true;
+			ImGui::TableNextColumn();
+			if (ImGui::CheckboxFlags("Guild", flag, channel_guild))
+				rval = true;
+			ImGui::TableNextColumn();
+			if (ImGui::CheckboxFlags("Ooc", flag, channel_ooc))
+				rval = true;
+			ImGui::TableNextColumn();
+			if (ImGui::CheckboxFlags("Shout", flag, channel_shout))
+				rval = true;
+			ImGui::TableNextColumn();
+			if (ImGui::CheckboxFlags("Say", flag, channel_say))
+				rval = true;
+			ImGui::TableNextColumn();
+			if (ImGui::CheckboxFlags("Emote", flag, channel_emote))
+				rval = true;
+			ImGui::TableNextColumn();
+			if (ImGui::CheckboxFlags("Any", flag, channel_any))
+				rval = true;
+			ImGui::EndTable();
+		}
+		ImGui::EndChildWidget();
+
+		return rval;
+	}
 	ImColor GenerateColorFromStr(const std::string& inputStr) {
 		// Use a hash function to generate a unique numeric value for the input string
 		std::hash<std::string> hashFunction;

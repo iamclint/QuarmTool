@@ -3,7 +3,8 @@
 #include <ctime>
 #include "nlohmann/json.hpp"
 #include <functional>
-enum class MatchType_
+#include "LogMonitor.h"
+enum MatchType_
 {
     MatchType_none,
     MatchType_regex,
@@ -30,11 +31,12 @@ struct ParseInfo
     std::string test_data;
     int duration;
     bool enabled;
+    int channels;
     // Default constructor
-    ParseInfo() : match_type(MatchType_::MatchType_regex), event_type(MatchEvent_None), enabled(true), duration(0) {}
+    ParseInfo() : match_type(MatchType_::MatchType_regex), event_type(MatchEvent_None), enabled(true), duration(0), channels(255) {}
 
     ParseInfo(const std::string& name_, const std::string& pattern_, const std::string& display_, int duration_, const std::string& sound_path_, MatchType_ type_, MatchEvent_ event_type_, bool enabled_)
-        : pattern(pattern_), match_type(type_), event_type(event_type_), enabled(enabled_), name(name_), display(display_), sound_path(sound_path_), duration(duration_) {}
+        : pattern(pattern_), match_type(type_), event_type(event_type_), enabled(enabled_), name(name_), display(display_), sound_path(sound_path_), duration(duration_), channels(255) {}
 
     ~ParseInfo() {}
 
@@ -49,7 +51,8 @@ struct ParseInfo
             {"type", static_cast<int>(match_type)},
             {"event_type", static_cast<int>(event_type)},
             {"enabled", enabled},
-            {"duration", duration}
+            {"duration", duration},
+            {"channels", channels}
         };
     }
 
@@ -64,6 +67,10 @@ struct ParseInfo
         j.at("display").get_to(display);
         j.at("sound_path").get_to(sound_path);
         j.at("duration").get_to(duration);
+        if (j.contains("channels"))
+            j.at("channels").get_to(channels);
+        else
+            channels = 255;
     }
 };
 
@@ -72,7 +79,7 @@ class UserGeneratedParser
 {
 public:
     std::vector<ParseInfo> parses;
-	void parse_data(std::time_t timestamp, std::string data);
+    void parse_data(class LineData& ld);
 	void draw_ui();
 	void draw();
     nlohmann::json get_vec();
