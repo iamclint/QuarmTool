@@ -53,6 +53,8 @@ void LineData::ParseChannelData()
             else
                 channel = channel_::channel_emote;
         }
+        else
+            channel = channel_::channel_emote;
         if (channel == channel_::channel_emote)
         {
             std::regex pattern(R"(\] (\w+))", std::regex_constants::icase);

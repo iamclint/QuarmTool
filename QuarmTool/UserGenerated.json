@@ -86,5 +86,16 @@
         "name": "burn",
         "sound_path": "",
         "type": 2
+    },
+    {
+        "channels": 64,
+        "display": "{1}",
+        "duration": 5,
+        "enabled": true,
+        "event_type": 4,
+        "match": "(.*)+",
+        "name": "",
+        "sound_path": "",
+        "type": 1
     }
 ]
