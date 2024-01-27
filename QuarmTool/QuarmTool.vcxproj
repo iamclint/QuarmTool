@@ -192,11 +192,15 @@
     <ClInclude Include="Notifications.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="QuarmTool.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="RollParser.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Timers.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="UserGeneratedParser.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="QuarmTool.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
