@@ -140,7 +140,7 @@ nlohmann::json UserGeneratedParser::get_vec()
 	return jsonData;
 }
 
-std::vector<std::string> get_parse_matches(ParseInfo& parse, std::string& data, std::string& display_data)
+std::vector<std::string> get_parse_matches(ParseInfo& parse, std::string& data, std::string& display_data, LineData& ld)
 {
 	std::vector<std::string> rvec;
 	if (parse.match_type == MatchType_::MatchType_regex)
@@ -183,6 +183,15 @@ std::vector<std::string> get_parse_matches(ParseInfo& parse, std::string& data, 
 			display_data.replace(pos, placeholder.length(), rvec[i]);
 			pos = display_data.find(placeholder);
 		}
+	}
+	std::string placeholder = "{sender}";
+	// Find the position of the placeholder in the original string
+	size_t pos = display_data.find(placeholder);
+
+	// Replace the placeholder with the corresponding string from the vector
+	while (pos != std::string::npos) {
+		display_data.replace(pos, placeholder.length(), ld.message_sender);
+		pos = display_data.find(placeholder);
 	}
 
 	return rvec;
@@ -259,7 +268,11 @@ void UserGeneratedParser::parse_data(LineData& ld)
 			if (!(p.channels & ld.channel))
 				continue;
 			std::string tmp_str = p.display;
-			std::vector<std::string> matches = get_parse_matches(p, ld.msg, tmp_str);
+			std::vector<std::string> matches;
+			if (ld.channel!=channel_emote)
+				matches = get_parse_matches(p, ld.channel_msg, tmp_str, ld);
+			else
+				matches = get_parse_matches(p, ld.msg, tmp_str, ld);
 			if (matches.size() > 0)
 			{
 				if (p.event_type & MatchEvent_Playsound)
@@ -419,7 +432,8 @@ void UserGeneratedParser::draw_ui()
 					last_sample = active_parse->test_data;
 					last_tmp_disp = active_parse->display;
 
-					last_matches = get_parse_matches(*active_parse, active_parse->test_data, last_tmp_disp);
+					LineData ld("Frewil tells you, 'welcome to the jungle'");
+					last_matches = get_parse_matches(*active_parse, active_parse->test_data, last_tmp_disp, ld);
 				}
 				ImGui::BeginChildWidget("RegexTestArea_Results", { 0,250.f }, 1, 0);
 				for (int index = 0 ; auto& m : last_matches)

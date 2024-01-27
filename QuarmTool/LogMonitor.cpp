@@ -58,7 +58,6 @@ void LineData::ParseChannelData()
         if (channel == channel_::channel_emote)
         {
             std::regex pattern(R"(\] (\w+))", std::regex_constants::icase);
-            std::string channel_str = "";
             std::smatch match;
             if (std::regex_search(full_msg, match, pattern) && match.size() > 0)
                 message_sender = match[1];
@@ -66,7 +65,6 @@ void LineData::ParseChannelData()
         else
         {
             std::regex pattern("'(.*)'", std::regex_constants::icase);
-            std::string channel_str = "";
             std::smatch match;
             if (std::regex_search(full_msg, match, pattern) && match.size() > 0)
                 channel_msg = match[1];

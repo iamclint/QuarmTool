@@ -89,7 +89,7 @@
     },
     {
         "channels": 64,
-        "display": "{1}",
+        "display": "{sender} {1}",
         "duration": 5,
         "enabled": true,
         "event_type": 4,

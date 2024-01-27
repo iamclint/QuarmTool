@@ -297,6 +297,7 @@ void Drawing::Draw()
 				{
 					tab_sel = -1;
 				}
+				ImGui::PopStyleVar();
 				ImGui::EndChild();
 			}
 			ImGui::SameLine();
