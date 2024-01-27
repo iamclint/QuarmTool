@@ -91,10 +91,10 @@
         "channels": 255,
         "display": "{sender} {2}",
         "duration": 5,
-        "enabled": true,
+        "enabled": false,
         "event_type": 4,
         "match": "(\\w+) (.*)+",
-        "name": "",
+        "name": "everything",
         "sound_path": "",
         "type": 1
     }

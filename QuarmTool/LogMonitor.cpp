@@ -326,7 +326,7 @@ void LogMonitor::HandleFileChange(std::string filename)
     if (!is_monitoring)
         return;
     static QuarmTool* qt = QuarmTool::GetInst();
-    if (filename.find("eqlog_") == 0 && filename.rfind("_pq.proj.txt") == (filename.length() - strlen("_pq.proj.txt")))
+    if (filename.find("eqlog_") == 0)// && filename.rfind("_pq.proj.txt") == (filename.length() - strlen("_pq.proj.txt"))
     { 
         if (filename != active_log) {
             active_log = filename;

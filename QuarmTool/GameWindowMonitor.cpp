@@ -26,10 +26,15 @@ BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam)
 
     if (processId == static_cast<DWORD>(lParam))
     {
+
         // Process the window here
-        if (GetWindowTitle(hwnd).find("Client") != std::string::npos)
+        if (GetWindowTitle(hwnd).find("Client") != std::string::npos) //quarm client
         {
             qt->pGameWindow->Handle=hwnd;
+        }
+        if (GetWindowTitle(hwnd).find("EverQuest") != std::string::npos) //p99 client
+        {
+            qt->pGameWindow->Handle = hwnd;
         }
     }
 

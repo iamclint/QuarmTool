@@ -1,7 +1,7 @@
 {
     "ch_channel_flags": 49,
     "ch_overlay": true,
-    "ch_regex": "(\\w+) ch [\\W]? ?(\\w+)",
-    "game_path": "D:\\Sony\\TAKP PC V2.1c\\TAKP PC V2.1",
-    "last_log": "eqlog_Conjuro_pq.proj.txt"
+    "ch_regex": "CA (\\d+) ch -- (\\w+)",
+    "game_path": "D:\\Sony\\EverQuest\\Logs",
+    "last_log": "eqlog_Healen_P1999Green.txt"
 }

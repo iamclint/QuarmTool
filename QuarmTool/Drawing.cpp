@@ -41,7 +41,7 @@ void FolderSelectQuarm()
 
 			// Initialize the BROWSEINFO structure
 			BROWSEINFOA bi = { 0 };
-			bi.lpszTitle = "Select your quarm folder"; // Set the dialog title
+			bi.lpszTitle = "Select log folder (quarm logs are in the base directory)"; // Set the dialog title
 			LPITEMIDLIST pidl = SHBrowseForFolderA(&bi);
 
 			if (pidl != NULL) {
@@ -225,7 +225,7 @@ void Drawing::Draw()
 			{
 				if (ImGui::BeginMenu("File"))
 				{
-					if (ImGui::MenuItem("Select quarm folder", "Ctrl+O"))
+					if (ImGui::MenuItem("Select log folder", "Ctrl+O"))
 					{
 						FolderSelectQuarm();
 					}
