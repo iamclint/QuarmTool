@@ -276,8 +276,11 @@ void CHParser::draw()
                             {
                                 std::string dur = DurationStr(currentTime, cast.startTime);
                                 ImVec2 text_size = ImGui::CalcTextSize(dur.c_str());
-                                ImGui::GetWindowDrawList()->AddText(WindowTranslate({ cast.current_pos + (ImGui::GetWindowWidth() - (cast.current_pos + w)) / 2 - (text_size.x / 2), (heal_height / 2) - text_size.y - 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f), dur.c_str());
-                                ImGui::GetWindowDrawList()->AddLine(WindowTranslate({ cast.current_pos + w, heal_height / 2 }), WindowTranslate({ ImGui::GetWindowWidth(), heal_height / 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f));
+                                if ((cast.current_pos + w + 15) < ImGui::GetWindowWidth())
+                                {
+                                    ImGui::GetWindowDrawList()->AddText(WindowTranslate({ cast.current_pos + (ImGui::GetWindowWidth() - (cast.current_pos + w)) / 2 - (text_size.x / 2), (heal_height / 2) - text_size.y - 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f), dur.c_str());
+                                    ImGui::GetWindowDrawList()->AddLine(WindowTranslate({ cast.current_pos + w, heal_height / 2 }), WindowTranslate({ ImGui::GetWindowWidth(), heal_height / 2 }), ImColor(0.0f, 0.5f, 0.0f, 1.f));
+                                }
                             }
                         }
 

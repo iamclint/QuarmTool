@@ -97,8 +97,11 @@ void RollParser::draw()
             // Format the time as a string
             char buffer[80]; // Adjust the buffer size as needed
             std::strftime(buffer, sizeof(buffer), "%H:%M:%S", &localTime);
-            ImColor col = ImGui::GenerateColorFromStr(vec.front().from +  vec.front().to + buffer).Value;
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, col.Value.z = .15f);
+            std::stringstream ss;
+            ss << vec.front().from << " to " << vec.front().to;
+            ImColor col = ImGui::GenerateColorFromStr(ss.str()).Value;
+            col.Value.w = .05f;
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, col.Value);
             ImGui::BeginChild(std::string("rollframe" + std::to_string(i) + "##" + std::to_string(i)).c_str(), { 160, 500 }, true);
             ImGui::Text("%i to %i (%s)", vec.front().from, vec.front().to, buffer);
 

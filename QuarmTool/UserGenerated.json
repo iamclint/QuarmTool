@@ -88,12 +88,12 @@
         "type": 2
     },
     {
-        "channels": 64,
-        "display": "{sender} {1}",
+        "channels": 255,
+        "display": "{sender} {2}",
         "duration": 5,
         "enabled": true,
         "event_type": 4,
-        "match": "(.*)+",
+        "match": "(\\w+) (.*)+",
         "name": "",
         "sound_path": "",
         "type": 1

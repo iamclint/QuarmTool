@@ -383,7 +383,7 @@ void UserGeneratedParser::draw_ui()
 				{
 					ImGui::InputInt("duration in seconds", &active_parse->duration);
 				}
-				ImGui::InputText("display", &active_parse->display);
+				ImGui::InputTextWithHint("display", "{sender} said {1}", &active_parse->display);
 				if (editing)
 				{
 					if (ImGui::Button("Save"))
@@ -432,7 +432,7 @@ void UserGeneratedParser::draw_ui()
 					last_sample = active_parse->test_data;
 					last_tmp_disp = active_parse->display;
 
-					LineData ld("Frewil tells you, 'welcome to the jungle'");
+					LineData ld("[Mon Jan 22 18:19:31 2024] Frewil tells you, 'welcome to the jungle'");
 					last_matches = get_parse_matches(*active_parse, active_parse->test_data, last_tmp_disp, ld);
 				}
 				ImGui::BeginChildWidget("RegexTestArea_Results", { 0,250.f }, 1, 0);

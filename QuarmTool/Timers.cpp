@@ -55,7 +55,7 @@ void TimerManager::draw_ui()
                 if (selected_index == -1)
                    ImGui::EndDisabled();
 
-            if (ImGui::BeginTable("timerstbl", 2, ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_Resizable))
+            if (ImGui::BeginTable("timerstbl", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable))
             {
                 for (int index = 0; auto & n : timers)
                 {
