@@ -209,7 +209,7 @@ void CHParser::draw()
                 continue;
 
 
-            if (IsWindowVisible(qt->pGameWindow->Handle))
+          //  if (IsWindowVisible(qt->pGameWindow->Handle))
             {
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
               //  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0, 0 });

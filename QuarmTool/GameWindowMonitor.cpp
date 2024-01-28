@@ -26,15 +26,18 @@ BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam)
 
     if (processId == static_cast<DWORD>(lParam))
     {
-
+        RECT Rect;
+        GetWindowRect(hwnd, &Rect);
+        std::cout << GetWindowTitle(hwnd) << " rect: " << Rect.right - Rect.left << " " << Rect.bottom - Rect.top << " " << Rect.left << " " << Rect.top << std::endl;
         // Process the window here
-        if (GetWindowTitle(hwnd).find("Client") != std::string::npos) //quarm client
-        {
-            qt->pGameWindow->Handle=hwnd;
-        }
+        //if (GetWindowTitle(hwnd).find("Client") != std::string::npos) //quarm client
+        //{
+        //    qt->pGameWindow->Handle = hwnd;
+        //}
         if (GetWindowTitle(hwnd).find("EverQuest") != std::string::npos) //p99 client
         {
             qt->pGameWindow->Handle = hwnd;
+
         }
     }
 
@@ -98,6 +101,8 @@ void GameWindowMonitor::monitor_process()
             Width = Rect.right - Rect.left;
             Height = Rect.bottom - Rect.top;
         }
+        else
+            Handle = Handle_p99;
         Sleep(1000);
     }
 }

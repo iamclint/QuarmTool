@@ -111,7 +111,7 @@ void TimerManager::draw()
         static bool has_ran = false;
         if (timers.size())
         {
-            if (IsWindowVisible(qt->pGameWindow->Handle))
+           // if (IsWindowVisible(qt->pGameWindow->Handle))
             {
 
                 ImGui::SetNextWindowBgAlpha(.85f);

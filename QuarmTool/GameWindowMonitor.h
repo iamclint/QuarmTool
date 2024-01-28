@@ -4,7 +4,8 @@
 class GameWindowMonitor
 {
 public:
-	HWND Handle=0;
+	HWND Handle = 0;
+	HWND Handle_p99 = 0;
 	RECT Rect = {};
 	float Width = 0;
 	float Height = 0;
