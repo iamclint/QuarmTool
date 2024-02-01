@@ -16,7 +16,7 @@
         "duration": 5,
         "enabled": true,
         "event_type": 4,
-        "match": "([\\w']+) (spell fizzles!)",
+        "match": "(.+) (spell fizzles!)",
         "name": "fizzle",
         "sound_path": "",
         "type": 1
@@ -78,23 +78,23 @@
     },
     {
         "channels": 255,
-        "display": "Damage shield",
-        "duration": 3,
-        "enabled": true,
-        "event_type": 2,
-        "match": "was burned.",
-        "name": "burn",
-        "sound_path": "",
-        "type": 2
-    },
-    {
-        "channels": 255,
         "display": "{sender} {2}",
         "duration": 5,
         "enabled": false,
         "event_type": 4,
         "match": "(\\w+) (.*)+",
         "name": "everything",
+        "sound_path": "",
+        "type": 1
+    },
+    {
+        "channels": 255,
+        "display": "Inferno Shield ({1})",
+        "duration": 120,
+        "enabled": true,
+        "event_type": 4,
+        "match": "(.+) (is enveloped by flame)",
+        "name": "inferno shield",
         "sound_path": "",
         "type": 1
     }

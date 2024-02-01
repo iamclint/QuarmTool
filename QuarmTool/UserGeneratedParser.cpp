@@ -316,6 +316,31 @@ void UserGeneratedParser::draw()
 
 }
 
+void UserGeneratedParser::confirm_delete()
+{
+	static QuarmTool* qt = QuarmTool::GetInst();
+	if (!qt)
+	{
+		qt = QuarmTool::GetInst();
+		return;
+	}
+	qt->pConfirmation->confirm("Confirm Deletion", "Are you sure you wish to delete: " + parses[selected].name, [this](bool t)
+		{
+			if (t)
+			{
+				parses.erase(parses.begin() + selected);
+				write_vec();
+			}
+			else
+			{
+				std::cout << "delete was cancelled" << std::endl;
+			}
+			selected = -1;
+			active_parse = 0;
+		});
+}
+
+
 
 void UserGeneratedParser::draw_ui()
 {
@@ -328,11 +353,10 @@ void UserGeneratedParser::draw_ui()
 	static ParseInfo tmp_parse;
 	if (!active_parse) 
 		active_parse = &tmp_parse;
-	static int selected = -1;
-	static bool editing = false;
-	ImGui::BeginChild("UserGeneratedParses");
-
 	
+	static bool editing = false;
+	static bool do_edit = false;
+	ImGui::BeginChild("UserGeneratedParses");
 	if (ImGui::BeginTable("EditingTable", 3, ImGuiTableFlags_SizingFixedSame))
 	{
 		ImGui::TableNextColumn();
@@ -460,8 +484,9 @@ void UserGeneratedParser::draw_ui()
 		ImGui::TableNextColumn();
 		if (selected < 0)
 			ImGui::BeginDisabled();
-		if (ImGui::Button("Edit"))
+		if (ImGui::Button("Edit") || do_edit)
 		{
+			do_edit = false;
 			active_parse = &parses[selected];
 			editing = true;
 			ImGui::OpenPopup("AddEditParse");
@@ -469,21 +494,7 @@ void UserGeneratedParser::draw_ui()
 		ImGui::TableNextColumn();
 		if (ImGui::Button("Delete"))
 		{
-			qt->pConfirmation->confirm("Confirm Deletion", "Are you sure you wish to delete: " + parses[selected].name, [this](bool t)
-				{
-					if (t)
-					{
-						parses.erase(parses.begin() + selected);
-						write_vec();
-					}
-					else
-					{
-						std::cout << "delete was cancelled" << std::endl;
-					}
-					selected = -1;
-				});
-
-
+			confirm_delete();
 		}
 		if (selected < 0)
 			ImGui::EndDisabled();
@@ -509,16 +520,31 @@ void UserGeneratedParser::draw_ui()
 				write_vec();
 			ImGui::TableNextColumn();
 			if (ImGui::Selectable(("##" + std::to_string(index) + e.name).c_str(), selected == index, ImGuiSelectableFlags_SpanAllColumns))
+			{
 				selected = index;
+				active_parse = &parses[selected];
+			}
+			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && selected == index)
+			{
+				do_edit = true;
+			}
+
 
 			if (ImGui::BeginPopupContextItem()) {
 				selected = index;
 				item_context = true;
-				if (ImGui::MenuItem("Copy")) {
+				if (ImGui::MenuItem("Edit", "ctrl+e")) {
+					do_edit = true;
+				}
+				if (ImGui::MenuItem("Copy", "ctrl+c")) {
 					nlohmann::json userparse;
 					e.to_json(userparse);
 					CopyToClipboard(userparse.dump());
 				}
+				if (ImGui::MenuItem("Delete", "delete")) {
+					confirm_delete();
+				}
+
 				ImGui::EndPopup();
 			}
 			ImGui::SameLine(-1);
@@ -553,6 +579,40 @@ void UserGeneratedParser::draw_ui()
 			index++;
 		}
 		ImGui::EndTable();
+		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete))) {
+			if (active_parse)
+			{
+				confirm_delete();
+			}
+		}
+		if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_E))) {
+			if (active_parse)
+			{
+				do_edit = true;
+			}
+		}
+		if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_C))) {
+			if (active_parse)
+			{
+				nlohmann::json userparse;
+				active_parse->to_json(userparse);
+				CopyToClipboard(userparse.dump());
+			}
+		}
+		// Check for Ctrl+V (paste)
+		if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_V))) {
+			std::string data = ReadFromClipboard();
+			if (is_valid_json(data))
+			{
+				ParseInfo nparse;
+				nlohmann::json jsonData = nlohmann::json::parse(data);
+				nparse.from_json(jsonData);
+				parses.push_back(nparse);
+				write_vec();
+			}
+
+		}
+
 	}
 	
 	if (!item_context && ImGui::BeginPopupContextWindow()) {

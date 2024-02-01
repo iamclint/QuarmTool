@@ -615,7 +615,10 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARA
         if (msg == WM_MBUTTONDOWN || msg == WM_MBUTTONDBLCLK) { button = 2; }
         if (msg == WM_XBUTTONDOWN || msg == WM_XBUTTONDBLCLK) { button = (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) ? 3 : 4; }
         if (bd->MouseButtonsDown == 0 && ::GetCapture() == NULL)
+        {
             ::SetCapture(hwnd);
+            ::SetFocus(hwnd);
+        }  
         bd->MouseButtonsDown |= 1 << button;
         io.AddMouseButtonEvent(button, true);
         return 0;

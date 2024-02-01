@@ -87,5 +87,8 @@ public:
     ParseInfo* active_parse;
     UserGeneratedParser();
     ~UserGeneratedParser();
+private:
+    void confirm_delete();
+    int selected = -1;
 };
 

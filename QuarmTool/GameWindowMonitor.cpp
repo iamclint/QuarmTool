@@ -28,7 +28,7 @@ BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam)
     {
         RECT Rect;
         GetWindowRect(hwnd, &Rect);
-        std::cout << GetWindowTitle(hwnd) << " rect: " << Rect.right - Rect.left << " " << Rect.bottom - Rect.top << " " << Rect.left << " " << Rect.top << std::endl;
+        //std::cout << GetWindowTitle(hwnd) << " rect: " << Rect.right - Rect.left << " " << Rect.bottom - Rect.top << " " << Rect.left << " " << Rect.top << std::endl;
         // Process the window here
         //if (GetWindowTitle(hwnd).find("Client") != std::string::npos) //quarm client
         //{

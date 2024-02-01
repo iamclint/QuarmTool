@@ -27,14 +27,14 @@ void ImConfirmation::draw()
 		if (ImGui::BeginTable((this->title + "##confirmbtn").c_str(), 2, ImGuiTableFlags_SizingFixedSame))
 		{
 			ImGui::TableNextColumn();
-			if (ImGui::Button("Yes"))
+			if (ImGui::Button("Yes") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
 			{
 				this->wait_confirm = false;
 				callback(true);
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::TableNextColumn();
-			if (ImGui::Button("No"))
+			if (ImGui::Button("No") || ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
 			{
 				this->wait_confirm = false;
 				callback(false);
